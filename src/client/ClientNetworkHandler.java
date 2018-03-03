@@ -5,28 +5,13 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
 
+import io.AbstractNetworkHandler;
 import util.Cheat;
 
-public class SimpleNetworkHandler extends AbstractNetworkHandler {
+public class ClientNetworkHandler extends AbstractNetworkHandler {
 	
-	private final Client client;
-	
-	private boolean stop;
-	
-	public SimpleNetworkHandler(SocketChannel channel, Client client) throws IOException {
-		super(channel, SelectionKey.OP_READ);
-		this.client = client;
-		this.stop = false;
-	}
-
-	@Override
-	protected boolean stop() {
-		return !client.isConnected() || stop;
-	}
-	
-	@Override
-	public void shutdown() {
-		stop = true;
+	public ClientNetworkHandler(SocketChannel channel, Client client) throws IOException {
+		super(channel, SelectionKey.OP_READ, client);
 	}
 	
 	@Override
@@ -37,7 +22,7 @@ public class SimpleNetworkHandler extends AbstractNetworkHandler {
 			if(sc.read(buffer) < 0) {
 				sk.cancel();
 				sc.close();
-				Cheat.LOGGER.log(Level.INFO, "Client disconnected.");
+				Cheat.LOGGER.log(Level.INFO, "Server disconnected.");
 				return;
 			}
 		} catch(IOException e) {
@@ -45,7 +30,7 @@ public class SimpleNetworkHandler extends AbstractNetworkHandler {
 		}
 		buffer.flip();
 		String message = Cheat.CHARSET.decode(buffer).toString();
-		System.err.println(message);
+		System.out.println(message);
 	}	
 
 }

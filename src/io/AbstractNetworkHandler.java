@@ -1,30 +1,50 @@
-package client;
+package io;
 
 import java.io.IOException;
+import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
-import java.nio.channels.SocketChannel;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.logging.Level;
 
 import util.Cheat;
 
 public abstract class AbstractNetworkHandler extends AbstractHandler implements NetworkHandler {
+	private final Map<SelectableChannel, Integer> channelOps = new HashMap<>();
 	private final Selector selector;
 	private final int op;
+	private final IOEntity ioEntity;
 	
-	public AbstractNetworkHandler(SocketChannel channel, int op) throws IOException {
+	private boolean stop;
+	
+	public AbstractNetworkHandler(SelectableChannel channel, int op, IOEntity ioEntity) throws IOException {
 		super(channel);
 		this.selector = Selector.open();
 		this.op = op;
-		channel.configureBlocking(false);
-		channel.register(selector, op);
+		this.ioEntity = ioEntity;
+		addChannel(channel, op);
+		this.stop = false;
 	}
 	
-	protected abstract boolean stop();
+	protected void addChannel(SelectableChannel channel, int op) throws IOException {
+		channel.configureBlocking(false);
+		channel.register(selector, op);
+		channelOps.put(channel, op);
+	}
+	
+	protected boolean stop() {
+		return !ioEntity.isActive() || stop;
+	}
+	
+	@Override
+	public void shutdown() {
+		stop = true;
+	}
 	
 	private boolean checkOps(SelectionKey sk, int op) {
-		return (sk.readyOps() & op & this.op) != 0;
+		return (sk.readyOps() & op & channelOps.get(sk.channel())) != 0;
 	}
 	
 	@Override
@@ -38,7 +58,6 @@ public abstract class AbstractNetworkHandler extends AbstractHandler implements 
 				itr = selector.selectedKeys().iterator();
 				while(itr.hasNext()) {
 					sk = itr.next();
-					
 					if(checkOps(sk, SelectionKey.OP_ACCEPT))
 						handleAcceptOperation(sk);
 					
@@ -62,22 +81,22 @@ public abstract class AbstractNetworkHandler extends AbstractHandler implements 
 	
 	@Override
 	public void handleAcceptOperation(SelectionKey sk) {
-		Cheat.LOGGER.log(Level.WARNING, this + " ignored Accept Operation");
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void handleReadOperation(SelectionKey sk) {
-		Cheat.LOGGER.log(Level.WARNING, this + " ignored Read Operation");
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void handleWriteOperation(SelectionKey sk) {
-		Cheat.LOGGER.log(Level.WARNING, this + " ignored Write Operation");
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void handleConnectOperation(SelectionKey sk) {
-		Cheat.LOGGER.log(Level.WARNING, this + " ignored Connect Operation");
+		throw new UnsupportedOperationException();
 	}
 	
 	@Override
