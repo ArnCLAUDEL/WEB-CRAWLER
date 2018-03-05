@@ -8,7 +8,7 @@ import util.Cheat;
 
 public abstract class AbstractRawInputHandler extends AbstractHandler {
 
-	private final ReadableByteChannel channel;
+	protected final ReadableByteChannel channel;
 	
 	private boolean stop;
 	
@@ -30,7 +30,6 @@ public abstract class AbstractRawInputHandler extends AbstractHandler {
 	
 	@Override
 	protected void handle() {
-		System.err.println("handling");
 		try {
 			buffer.clear();
 			if(channel.read(buffer) < 0) {
@@ -39,7 +38,7 @@ public abstract class AbstractRawInputHandler extends AbstractHandler {
 			}
 			buffer.flip();
 			String message = Cheat.CHARSET.decode(buffer).toString();
-			System.out.println(message);
+			System.err.println(message);
 		} catch (IOException e) {
 			Cheat.LOGGER.log(Level.WARNING, e.getMessage(), e);
 		}
