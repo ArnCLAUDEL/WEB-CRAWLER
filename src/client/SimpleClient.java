@@ -46,7 +46,7 @@ public class SimpleClient extends AbstractIOEntity implements Client {
 	@Override
 	protected void startHandlers() throws IOException {
 		addHandler(new ClientNetworkHandler(channel, this));
-		addHandler(new ClientKeyboardHandler());
+		addHandler(new ClientKeyboardHandler(channel));
 	}
 	
 	@Override
