@@ -14,15 +14,13 @@ import util.Cheat;
 public abstract class AbstractNetworkHandler extends AbstractHandler implements NetworkHandler {
 	private final Map<SelectableChannel, Integer> channelOps = new HashMap<>();
 	private final Selector selector;
-	private final int op;
 	private final IOEntity ioEntity;
 	
 	private boolean stop;
 	
 	public AbstractNetworkHandler(SelectableChannel channel, int op, IOEntity ioEntity) throws IOException {
-		super(channel);
+		super();
 		this.selector = Selector.open();
-		this.op = op;
 		this.ioEntity = ioEntity;
 		addChannel(channel, op);
 		this.stop = false;
@@ -34,6 +32,7 @@ public abstract class AbstractNetworkHandler extends AbstractHandler implements 
 		channelOps.put(channel, op);
 	}
 	
+	@Override
 	protected boolean stop() {
 		return !ioEntity.isActive() || stop;
 	}
@@ -48,35 +47,31 @@ public abstract class AbstractNetworkHandler extends AbstractHandler implements 
 	}
 	
 	@Override
-	public void run() {
-		Cheat.LOGGER.log(Level.INFO, this + " starting.");
-		Iterator<SelectionKey> itr;
-		SelectionKey sk;
-		while(!stop()) {
-			try {
-				selector.select();
-				itr = selector.selectedKeys().iterator();
-				while(itr.hasNext()) {
-					sk = itr.next();
-					if(checkOps(sk, SelectionKey.OP_ACCEPT))
-						handleAcceptOperation(sk);
-					
-					else if(checkOps(sk, SelectionKey.OP_READ))
-						handleReadOperation(sk);
+	public void handle() {
+		try {
+			Iterator<SelectionKey> itr;
+			SelectionKey sk;
+			selector.select();
+			itr = selector.selectedKeys().iterator();
+			while(itr.hasNext()) {
+				sk = itr.next();
+				if(checkOps(sk, SelectionKey.OP_ACCEPT))
+					handleAcceptOperation(sk);
+				
+				else if(checkOps(sk, SelectionKey.OP_READ))
+					handleReadOperation(sk);
 
-					else if(checkOps(sk, SelectionKey.OP_WRITE))
-						handleWriteOperation(sk);
-					
-					else if(checkOps(sk, SelectionKey.OP_CONNECT))
-						handleConnectOperation(sk);
-					
-					itr.remove();
-				}
-			} catch (IOException e) {
-				Cheat.LOGGER.log(Level.WARNING, e.getMessage(), e);
+				else if(checkOps(sk, SelectionKey.OP_WRITE))
+					handleWriteOperation(sk);
+				
+				else if(checkOps(sk, SelectionKey.OP_CONNECT))
+					handleConnectOperation(sk);
+				
+				itr.remove();
 			}
+		} catch (IOException e) {
+			Cheat.LOGGER.log(Level.WARNING, e.getMessage(), e);
 		}
-		Cheat.LOGGER.log(Level.INFO, this + " shutting down.");
 	}
 	
 	@Override

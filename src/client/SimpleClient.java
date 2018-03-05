@@ -39,35 +39,6 @@ public class SimpleClient extends AbstractIOEntity implements Client {
 	}
 	
 	@Override
-	public void run() {
-		Cheat.LOGGER.log(Level.INFO, this + " starting.");
-		try {
-			init();
-			Cheat.LOGGER.log(Level.INFO, this + " activated.");
-			startHandlers();
-			ByteBuffer bb = ByteBuffer.allocate(512);
-			for(int i = 0; i < 10; i++) {
-				bb.clear();
-				bb.put(("Message " + i + " from " + this).getBytes());
-				bb.flip();
-				channel.write(bb);
-				try{Thread.sleep(500);}
-				catch(InterruptedException e) {}
-			}
-			while(!stop) {
-				try {
-					synchronized (this) {
-						wait();
-					}
-				} catch (InterruptedException e) {}
-			}
-		} catch (IOException e) {
-			Cheat.LOGGER.log(Level.SEVERE, e.getMessage(), e);
-		}
-		Cheat.LOGGER.log(Level.INFO, this + " shutting down.");
-	}
-	
-	@Override
 	protected void init() throws IOException {
 		this.channel = connect(hostname, port);
 	}
@@ -75,6 +46,7 @@ public class SimpleClient extends AbstractIOEntity implements Client {
 	@Override
 	protected void startHandlers() throws IOException {
 		addHandler(new ClientNetworkHandler(channel, this));
+		addHandler(new ClientKeyboardHandler());
 	}
 	
 	@Override
