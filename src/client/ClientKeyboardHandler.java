@@ -26,6 +26,10 @@ public class ClientKeyboardHandler extends AbstractRawInputHandler{
 				return;
 			}
 			buffer.flip();
+			int i = buffer.get();
+			buffer.clear();
+			buffer.put((byte)(i-48));
+			buffer.flip();
 			channelOUT.write(buffer);
 		} catch (IOException e) {
 			Cheat.LOGGER.log(Level.WARNING, e.getMessage(), e);
