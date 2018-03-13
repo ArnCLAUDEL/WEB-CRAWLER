@@ -1,7 +1,11 @@
 package util;
 
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.util.Random;
+import java.util.Set;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -22,5 +26,20 @@ public class Cheat {
 		logger.addHandler(consoleHandler);
 		logger.setLevel(level);
 		logger.setUseParentHandlers(false);
+	}
+	
+	private void httpRequest() {
+		/*
+		SocketChannel s = SocketChannel.open(new InetSocketAddress("www.onisep.fr", 80));
+		ByteBuffer b = ByteBuffer.allocate(2048);
+		b.put(("GET /Formation-et-handicap HTTP/1.1\r\n" +  
+		"Host: www.onisep.fr\r\n" + 
+		"Connection: Keep-Alive\r\n\r\n").getBytes());
+		
+		b.flip();
+		s.write(b);
+		
+		Set<String> links = getContent(s.socket().getInputStream());
+		*/
 	}
 }
