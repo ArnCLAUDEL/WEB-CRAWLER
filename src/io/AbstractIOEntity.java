@@ -9,17 +9,29 @@ import util.Cheat;
 
 public abstract class AbstractIOEntity implements IOEntity {
 	private final Set<AbstractHandler> handlers;
+	private final String name;
 	
 	protected boolean stop;
 	
-	public AbstractIOEntity() {
+	public AbstractIOEntity(String name) {
 		this.handlers = new HashSet<>();
 		this.stop = false;
+		this.name = name;
+	}
+	
+	public AbstractIOEntity() {
+		this("No name");
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 	protected abstract void init() throws IOException;
 	
 	protected abstract void startHandlers() throws IOException;
+	
+	protected abstract void start() throws IOException;
 	
 	@Override
 	public void run() {
@@ -28,6 +40,7 @@ public abstract class AbstractIOEntity implements IOEntity {
 			init();
 			Cheat.LOGGER.log(Level.INFO, this + " activated.");
 			startHandlers();
+			start();
 			while(!stop) {
 				try {
 					synchronized (this) {

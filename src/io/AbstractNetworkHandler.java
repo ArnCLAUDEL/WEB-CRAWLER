@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -13,6 +14,7 @@ import util.Cheat;
 
 public abstract class AbstractNetworkHandler extends AbstractHandler implements NetworkHandler {
 	private final Map<SelectableChannel, Integer> channelOps = new HashMap<>();
+	private final Map<SelectableChannel, SerializerBuffer> channelBuffers = new HashMap<>();
 	private final Selector selector;
 	private final IOEntity ioEntity;
 	
@@ -30,6 +32,11 @@ public abstract class AbstractNetworkHandler extends AbstractHandler implements 
 		channel.configureBlocking(false);
 		channel.register(selector, op);
 		channelOps.put(channel, op);
+		channelBuffers.put(channel, new SerializerBuffer());
+	}
+	
+	protected SerializerBuffer getSerializerBuffer(SelectableChannel channel) {
+		return channelBuffers.get(channel);
 	}
 	
 	@Override
@@ -59,10 +66,10 @@ public abstract class AbstractNetworkHandler extends AbstractHandler implements 
 					handleAcceptOperation(sk);
 				
 				else if(checkOps(sk, SelectionKey.OP_READ))
-					handleReadOperation(sk);
+					handleReadOperation(sk, channelBuffers.get(sk.channel()));
 
 				else if(checkOps(sk, SelectionKey.OP_WRITE))
-					handleWriteOperation(sk);
+					handleWriteOperation(sk, channelBuffers.get(sk.channel()));
 				
 				else if(checkOps(sk, SelectionKey.OP_CONNECT))
 					handleConnectOperation(sk);
@@ -80,12 +87,12 @@ public abstract class AbstractNetworkHandler extends AbstractHandler implements 
 	}
 
 	@Override
-	public void handleReadOperation(SelectionKey sk) {
+	public void handleReadOperation(SelectionKey sk, SerializerBuffer serializerBuffer) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void handleWriteOperation(SelectionKey sk) {
+	public void handleWriteOperation(SelectionKey sk, SerializerBuffer serializerBuffer) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -93,6 +100,8 @@ public abstract class AbstractNetworkHandler extends AbstractHandler implements 
 	public void handleConnectOperation(SelectionKey sk) {
 		throw new UnsupportedOperationException();
 	}
+	
+	protected abstract void handleProtocol(SocketChannel channel, SerializerBuffer serializerBuffer);
 	
 	@Override
 	public String toString() {

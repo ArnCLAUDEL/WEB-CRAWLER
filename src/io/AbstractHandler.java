@@ -8,10 +8,12 @@ import util.Cheat;
 public abstract class AbstractHandler implements Runnable {
 	private final static int BUFFER_SIZE = 1024;
 	
-	protected final ByteBuffer buffer;
+	//protected final ByteBuffer buffer;
+	//protected final SerializerBuffer serializerBuffer;
 	
 	public AbstractHandler() {
-		this.buffer = ByteBuffer.allocate(BUFFER_SIZE);
+		//this.buffer = ByteBuffer.allocate(BUFFER_SIZE);
+		//this.serializerBuffer = new SerializerBuffer(buffer);
 	}
 
 	protected abstract boolean stop();

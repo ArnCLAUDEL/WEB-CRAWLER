@@ -9,13 +9,16 @@ import util.Cheat;
 public abstract class AbstractRawInputHandler extends AbstractHandler {
 
 	protected final ReadableByteChannel channel;
+	protected final SerializerBuffer serializerBuffer;
 	
 	private boolean stop;
 	
 	public AbstractRawInputHandler(ReadableByteChannel channel) {
 		super();
 		this.channel = channel;
+		this.serializerBuffer = new SerializerBuffer();
 		this.stop = false;
+
 	}
 	
 	@Override
@@ -31,13 +34,13 @@ public abstract class AbstractRawInputHandler extends AbstractHandler {
 	@Override
 	protected void handle() {
 		try {
-			buffer.clear();
-			if(channel.read(buffer) < 0) {
+			serializerBuffer.clear();
+			if(serializerBuffer.read(channel) < 0) {
 				shutdown();
 				return;
 			}
-			buffer.flip();
-			String message = Cheat.CHARSET.decode(buffer).toString();
+			serializerBuffer.flip();
+			String message = serializerBuffer.toString();
 			System.err.println(message);
 		} catch (IOException e) {
 			Cheat.LOGGER.log(Level.WARNING, e.getMessage(), e);

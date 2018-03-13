@@ -1,8 +1,9 @@
 package io;
 
 public interface IOEntity extends Runnable {
-	public boolean isActive();
-	public void shutdown();
-	public void addHandler(AbstractHandler handler);
-	public void removeHandler(AbstractHandler handler);
+	boolean isActive();
+	void shutdown();
+	void addHandler(AbstractHandler handler);
+	void removeHandler(AbstractHandler handler);
+	String getName();
 }
