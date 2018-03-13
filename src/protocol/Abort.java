@@ -3,12 +3,12 @@ package protocol;
 import io.Creator;
 import io.SerializerBuffer;
 
-public class Reply extends Message {
-	public static final Creator<Reply> CREATOR = Reply::new;
+public class Abort extends Message {
+	public static final Creator<Abort> CREATOR = Abort::new;
 	
 	@Override
 	public void writeToBuff(SerializerBuffer ms) {
-		ms.write(Flag.REPLY);
+		ms.write(Flag.ABORT);
 	}
 
 	@Override
