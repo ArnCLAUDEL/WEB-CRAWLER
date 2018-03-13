@@ -8,7 +8,7 @@ import java.util.logging.Level;
 
 import protocol.ClientIdentifier;
 import protocol.Reply;
-import protocol.ServerProtocolHandler;
+import protocol.Request;
 import server.state.ActiveServerProtocolHandler;
 import server.state.InactiveServerProtocolHandler;
 import util.Cheat;
@@ -45,6 +45,11 @@ public class SimpleServer extends AbstractServer {
 	}
 	
 	@Override
+	protected void start() throws IOException {
+		
+	}
+	
+	@Override
 	public boolean isActive() {
 		return active;
 	}	
@@ -54,32 +59,44 @@ public class SimpleServer extends AbstractServer {
 		return "Server " + Thread.currentThread().getId();
 	}
 
-	@Override
+	
+	
 	public boolean handleInit(ClientIdentifier clientId) {
 		return protocolHandler.handleInit(clientId);
 	}
 
-	@Override
-	public void handleForget(ClientIdentifier clientId) {
-		protocolHandler.handleForget(clientId);
-	}
-
-	@Override
 	public void handleStartService(ClientIdentifier clientId) {
 		protocolHandler.handleStartService(clientId);
 	}
-	
-	@Override
+
 	public void handleStopService(ClientIdentifier clientId) {
 		protocolHandler.handleStopService(clientId);
 	}
 
-	@Override
 	public void handleReply(ClientIdentifier clientId, Reply reply) {
 		protocolHandler.handleReply(clientId, reply);
 	}
 
-	
+	public void handleForget(ClientIdentifier clientId) {
+		protocolHandler.handleForget(clientId);
+	}
+
+	public void handleDecline(ClientIdentifier clientId, Request request) {
+		protocolHandler.handleDecline(clientId, request);
+	}
+
+	public void sendOk(ClientIdentifier clientId) {
+		protocolHandler.sendOk(clientId);
+	}
+
+	public void sendAbort(ClientIdentifier clientId, Request request) {
+		protocolHandler.sendAbort(clientId, request);
+	}
+
+	public void sendRequest(ClientIdentifier clientId, Request request) {
+		protocolHandler.sendRequest(clientId, request);
+	}
+
 	public static void main(String[] args) {
 		Cheat.setLoggerLevelDisplay(Level.ALL);
 		

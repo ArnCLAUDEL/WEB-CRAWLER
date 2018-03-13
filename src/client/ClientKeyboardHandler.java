@@ -6,6 +6,7 @@ import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
 
 import io.AbstractRawInputHandler;
+import io.SerializerBuffer;
 import util.Cheat;
 
 public class ClientKeyboardHandler extends AbstractRawInputHandler{
@@ -20,17 +21,13 @@ public class ClientKeyboardHandler extends AbstractRawInputHandler{
 	@Override
 	protected void handle() {
 		try {
-			buffer.clear();
-			if(channel.read(buffer) < 0) {
+			serializerBuffer.clear();
+			if(serializerBuffer.read(channel) < 0) {
 				shutdown();
 				return;
 			}
-			buffer.flip();
-			int i = buffer.get();
-			buffer.clear();
-			buffer.put((byte)(i-48));
-			buffer.flip();
-			channelOUT.write(buffer);
+			serializerBuffer.flip();
+			serializerBuffer.write(channelOUT);
 		} catch (IOException e) {
 			Cheat.LOGGER.log(Level.WARNING, e.getMessage(), e);
 		}

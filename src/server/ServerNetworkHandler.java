@@ -9,8 +9,10 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import io.AbstractNetworkHandler;
+import io.SerializerBuffer;
 import protocol.ClientIdentifier;
 import protocol.Flag;
+import protocol.Init;
 import protocol.Reply;
 import util.Cheat;
 
@@ -37,32 +39,30 @@ public class ServerNetworkHandler extends AbstractNetworkHandler {
 	}
 	
 	@Override
-	public void handleReadOperation(SelectionKey sk) {
+	public void handleReadOperation(SelectionKey sk, SerializerBuffer serializerBuffer) {
 		Cheat.LOGGER.log(Level.FINER, "Message received.");
-		buffer.clear();
+		
+		serializerBuffer.clear();
 		SocketChannel sc = (SocketChannel) sk.channel();
 		try {
-			if(sc.read(buffer) < 0) {
+			if(serializerBuffer.read(sc) < 0) {
 				sk.cancel();
 				sc.close();
 				Cheat.LOGGER.log(Level.INFO, "Client disconnected.");
 				return;
 			}
-			buffer.flip();
-			handleProtocol(sc);
-			sc.write(buffer.slice());
+			serializerBuffer.flip();
+			handleProtocol(sc, serializerBuffer);
 		} catch(IOException e) {
 			Cheat.LOGGER.log(Level.WARNING, e.getMessage(), e);
 		}
-		String message = Cheat.CHARSET.decode(buffer).toString();
-		System.out.println(message);
 	}
 	
-	private void handleProtocol(SocketChannel channel) {
+	protected void handleProtocol(SocketChannel channel, SerializerBuffer serializerBuffer) {
 		// TODO
-		byte flag = buffer.get();
+		byte flag = serializerBuffer.get();
 		if(flag == Flag.INIT) {
-			handleInit(channel);
+			handleInit(channel, serializerBuffer);
 			return;
 		}
 		ClientIdentifier clientId = clients.get(channel);		
@@ -77,12 +77,15 @@ public class ServerNetworkHandler extends AbstractNetworkHandler {
 	}
 	
 	
-	private void handleInit(SocketChannel channel) {
-		// TODO 
-		/* 	Retrieve data
-		 	Build a ClientIdentifier
-		*/
-		ClientIdentifier clientId = new ClientIdentifier();
+	private void handleInit(SocketChannel channel, SerializerBuffer serializerBuffer) {
+		Init initMessage = Init.CREATOR.init();
+		initMessage.readFromBuff(serializerBuffer);
+		
+		ClientIdentifier clientId = new ClientIdentifier.BUILDER(initMessage.getName(), channel)
+														.nbTaskMax(initMessage.getNbTaskMax())
+														.nbProcessUnits(initMessage.getNbProcessUnits())
+														.build();
+		
 		if(server.handleInit(clientId))
 			this.clients.put(channel, clientId);
 	}
