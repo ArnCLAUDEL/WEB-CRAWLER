@@ -24,6 +24,10 @@ public class SerializerBuffer {
 		this(BUFFER_SIZE);
 	}
 	
+	public ByteBuffer getBuffer() {
+		return buffer;
+	}
+	
 	public int read(ReadableByteChannel channel) throws IOException {
 		return channel.read(buffer);
 	}

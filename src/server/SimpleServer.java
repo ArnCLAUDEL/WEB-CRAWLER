@@ -32,6 +32,15 @@ public class SimpleServer extends AbstractServer {
 	}
 	
 	@Override
+	public void scan(String hostname) {
+		Cheat.LOGGER.log(Level.INFO, "Preparing request.");
+		Request request = new Request(hostname);
+		activeClients	.stream()
+						.forEach(c -> protocolHandler.sendRequest(c, request));
+		Cheat.LOGGER.log(Level.INFO, "Request sent to clients.");
+	}
+	
+	@Override
 	protected void init() throws IOException {
 		serverSocket = ServerSocketChannel.open();
 		serverSocket.bind(address);
@@ -42,6 +51,7 @@ public class SimpleServer extends AbstractServer {
 	@Override
 	protected void startHandlers() throws IOException {
 		addHandler(new ServerNetworkHandler(serverSocket, this));
+		addHandler(new ServerKeyboardHandler(this));
 	}
 	
 	@Override

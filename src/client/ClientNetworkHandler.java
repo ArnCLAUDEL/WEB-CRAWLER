@@ -7,8 +7,8 @@ import java.util.logging.Level;
 
 import io.AbstractNetworkHandler;
 import io.SerializerBuffer;
-import protocol.ClientIdentifier;
 import protocol.Flag;
+import protocol.Request;
 import util.Cheat;
 
 public class ClientNetworkHandler extends AbstractNetworkHandler {
@@ -55,6 +55,9 @@ public class ClientNetworkHandler extends AbstractNetworkHandler {
 		// Retrieve data
 		// Build a Request
 		// client.handleRequest(request);
+		Request request = Request.CREATOR.init();
+		request.readFromBuff(serializerBuffer);
+		client.handleRequest(request);
 	}
 	
 	private void handleAbort(SocketChannel channel, SerializerBuffer serializerBuffer) {
@@ -62,6 +65,7 @@ public class ClientNetworkHandler extends AbstractNetworkHandler {
 		// Retrieve data
 		// Build a Request
 		// client.handleAbort(request);
+		Cheat.LOGGER.log(Level.WARNING, "Handling Abort (not yet implemented)");
 	}
 
 }

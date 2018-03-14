@@ -3,34 +3,22 @@ package client;
 import java.io.IOException;
 import java.nio.channels.Channels;
 import java.nio.channels.SocketChannel;
-import java.util.logging.Level;
 
-import io.AbstractRawInputHandler;
+import io.AbstractKeyboardHandler;
 import io.SerializerBuffer;
-import util.Cheat;
 
-public class ClientKeyboardHandler extends AbstractRawInputHandler{
+public class ClientKeyboardHandler extends AbstractKeyboardHandler {
 
 	private final SocketChannel channelOUT;
 	
 	public ClientKeyboardHandler(SocketChannel channelOUT) {
-		super(Channels.newChannel(System.in));
+		super();
 		this.channelOUT = channelOUT;
 	}
 	
 	@Override
-	protected void handle() {
-		try {
-			serializerBuffer.clear();
-			if(serializerBuffer.read(channel) < 0) {
-				shutdown();
-				return;
-			}
-			serializerBuffer.flip();
-			serializerBuffer.write(channelOUT);
-		} catch (IOException e) {
-			Cheat.LOGGER.log(Level.WARNING, e.getMessage(), e);
-		}
+	protected void handle(SerializerBuffer serializerBuffer) throws IOException {
+		serializerBuffer.write(channelOUT);
 	}
 	
 	@Override

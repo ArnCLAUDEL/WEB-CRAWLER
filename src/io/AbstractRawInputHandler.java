@@ -40,12 +40,13 @@ public abstract class AbstractRawInputHandler extends AbstractHandler {
 				return;
 			}
 			serializerBuffer.flip();
-			String message = serializerBuffer.toString();
-			System.err.println(message);
+			handle(serializerBuffer);
 		} catch (IOException e) {
 			Cheat.LOGGER.log(Level.WARNING, e.getMessage(), e);
 		}
 	}
+	
+	protected abstract void handle(SerializerBuffer serializerBuffer) throws IOException;
 	
 	@Override
 	public String toString() {
