@@ -1,7 +1,9 @@
 package client.state;
 
-import client.Client;
 import java.nio.channels.SocketChannel;
+
+import client.Client;
+import protocol.Ok;
 
 public class InactiveStartSentClientProtocolHandler extends InactiveClientProtocolHandler {
 	
@@ -10,7 +12,7 @@ public class InactiveStartSentClientProtocolHandler extends InactiveClientProtoc
 	}
 	
 	@Override
-	public void handleOk() {
+	public void handleOk(Ok ok) {
 		client.setProtocolHandler(new ActiveClientProtocolHandler(client, channel));
 	}
 	

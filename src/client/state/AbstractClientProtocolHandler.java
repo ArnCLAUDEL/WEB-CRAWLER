@@ -7,8 +7,16 @@ import java.util.logging.Level;
 import client.Client;
 import client.ClientProtocolHandler;
 import io.SerializerBuffer;
+import protocol.Abort;
+import protocol.Decline;
+import protocol.Forget;
+import protocol.Init;
+import protocol.Message;
+import protocol.Ok;
 import protocol.Reply;
 import protocol.Request;
+import protocol.StartService;
+import protocol.StopService;
 import util.Cheat;
 
 public abstract class AbstractClientProtocolHandler implements ClientProtocolHandler {
@@ -32,48 +40,59 @@ public abstract class AbstractClientProtocolHandler implements ClientProtocolHan
 		}
 	}
 	
-	@Override
-	public void handleRequest(Request request) {
-		Cheat.LOGGER.log(Level.FINEST, "Server Request ignored.");
-	}
-
-	@Override
-	public void handleOk() {
-		Cheat.LOGGER.log(Level.FINEST, "Server Ok ignored.");
+	protected boolean send(Message message) {
+		serializerBuffer.clear();
+		message.writeToBuff(serializerBuffer);
+		serializerBuffer.flip();
+		if(send()) {
+			Cheat.LOGGER.log(Level.FINER, message + " sent.");
+			return true;
+		}
+		return false;
 	}
 	
 	@Override
-	public void handleAbort(Request request) {
-		Cheat.LOGGER.log(Level.FINEST, "Server Abort ignored.");
+	public void handleRequest(Request request) {
+		Cheat.LOGGER.log(Level.FINEST, "Request ignored.");
 	}
 
 	@Override
-	public void sendInit() {
-		Cheat.LOGGER.log(Level.FINEST, "Client Init sending ignored.");
+	public void handleOk(Ok ok) {
+		Cheat.LOGGER.log(Level.FINEST, "Ok ignored.");
+	}
+	
+	@Override
+	public void handleAbort(Abort abort) {
+		Cheat.LOGGER.log(Level.FINEST, "Abort ignored.");
 	}
 
 	@Override
-	public void sendStartService() {
-		Cheat.LOGGER.log(Level.FINEST, "Client Start Service sending ignored.");
+	public void sendInit(Init init) {
+		Cheat.LOGGER.log(Level.FINEST, "Init ignored.");
 	}
 
 	@Override
-	public void sendStopService() {
-		Cheat.LOGGER.log(Level.FINEST, "Client Stop Service sending ignored.");
+	public void sendStartService(StartService startService) {
+		Cheat.LOGGER.log(Level.FINEST, "Start Service ignored.");
+	}
+
+	@Override
+	public void sendStopService(StopService stopService) {
+		Cheat.LOGGER.log(Level.FINEST, "Stop Service ignored.");
 	}
 
 	@Override
 	public void sendReply(Reply reply) {
-		Cheat.LOGGER.log(Level.FINEST, "Client Reply sending ignored.");
+		Cheat.LOGGER.log(Level.FINEST, "Reply ignored.");
 	}
 
 	@Override
-	public void sendDecline(Request request) {
-		Cheat.LOGGER.log(Level.FINEST, "Client Decline sending ignored.");
+	public void sendDecline(Decline decline) {
+		Cheat.LOGGER.log(Level.FINEST, "Decline ignored.");
 	}
 
 	@Override
-	public void sendForget() {
-		Cheat.LOGGER.log(Level.FINEST, "Client Forget sending ignored.");
+	public void sendForget(Forget forget) {
+		Cheat.LOGGER.log(Level.FINEST, "Forget ignored.");
 	}
 }

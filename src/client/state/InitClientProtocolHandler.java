@@ -1,12 +1,9 @@
 package client.state;
 
-import java.io.IOException;
 import java.nio.channels.SocketChannel;
-import java.util.logging.Level;
 
 import client.Client;
 import protocol.Init;
-import util.Cheat;
 
 public class InitClientProtocolHandler extends AbstractClientProtocolHandler {
 	
@@ -15,12 +12,8 @@ public class InitClientProtocolHandler extends AbstractClientProtocolHandler {
 	}
 
 	@Override
-	public void sendInit() {
-		serializerBuffer.clear();
-		Init initMessage = new Init(client.getName(), client.getNbTaskMax(), client.getNbProcessUnits());
-		initMessage.writeToBuff(serializerBuffer);
-		serializerBuffer.flip();
-		if(send())
+	public void sendInit(Init init) {
+		if(send(init))
 			client.setProtocolHandler(new InitSentClientProtocolHandler(client, channel));
 	}
 	

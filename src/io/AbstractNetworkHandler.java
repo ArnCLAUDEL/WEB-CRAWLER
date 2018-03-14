@@ -8,8 +8,11 @@ import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
+import protocol.Message;
 import util.Cheat;
 
 public abstract class AbstractNetworkHandler extends AbstractHandler implements NetworkHandler {
@@ -102,6 +105,18 @@ public abstract class AbstractNetworkHandler extends AbstractHandler implements 
 	}
 	
 	protected abstract void handleProtocol(SocketChannel channel, SerializerBuffer serializerBuffer);
+	
+	protected <M extends Message> void handleMessage(SerializerBuffer serializerBuffer, Creator<M> messageCreator, Consumer<M> handler) {
+		M message = messageCreator.init();
+		message.readFromBuff(serializerBuffer);
+		handler.accept(message);
+	}
+	
+	protected <M extends Message,T> void handleMessage(SerializerBuffer serializerBuffer, T info, Creator<M> messageCreator, BiConsumer<T,M> handler) {
+		M message = messageCreator.init();
+		message.readFromBuff(serializerBuffer);
+		handler.accept(info, message);
+	}
 	
 	@Override
 	public String toString() {

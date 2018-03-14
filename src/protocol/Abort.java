@@ -14,7 +14,6 @@ public class Abort extends Message {
 	@Override
 	public void readFromBuff(SerializerBuffer ms) {
 		// TODO 
-		
 	}
 
 }

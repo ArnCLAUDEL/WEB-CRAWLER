@@ -77,6 +77,6 @@ public abstract class AbstractIOEntity implements IOEntity {
 	
 	@Override
 	public String toString() {
-		return "IOEntity " + Thread.currentThread().getId();
+		return name;
 	}
 }

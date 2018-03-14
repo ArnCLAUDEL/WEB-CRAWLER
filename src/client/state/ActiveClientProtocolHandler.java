@@ -4,7 +4,9 @@ import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
 
 import client.Client;
+import protocol.Abort;
 import protocol.Decline;
+import protocol.Forget;
 import protocol.Reply;
 import protocol.Request;
 import protocol.StopService;
@@ -19,33 +21,24 @@ public class ActiveClientProtocolHandler extends AbstractClientProtocolHandler {
 	@Override
 	public void sendReply(Reply reply) {
 		// TODO
-		serializerBuffer.clear();
-		reply.writeToBuff(serializerBuffer);
-		serializerBuffer.flip();
-		if(send())
-			Cheat.LOGGER.log(Level.INFO, "Reply sent.");
+		send(reply);
 	}
 	
 	@Override
-	public void sendDecline(Request request) {
-		// TODO
-		serializerBuffer.clear();
-		Decline decline = new Decline();
-		decline.writeToBuff(serializerBuffer);
-		serializerBuffer.flip();
-		if(send())
-			Cheat.LOGGER.log(Level.INFO, "Decline sent.");
+	public void sendDecline(Decline decline) {
+		send(decline);
 	}
 	
 	@Override
-	public void sendStopService() {
-		// TODO
-		serializerBuffer.clear();
-		StopService stopService = new StopService();
-		stopService.writeToBuff(serializerBuffer);
-		serializerBuffer.flip();
-		if(send())
-			Cheat.LOGGER.log(Level.INFO, "Reply sent.");
+	public void sendStopService(StopService stopService) {
+		if(send(stopService))
+			client.setProtocolHandler(new InactiveClientProtocolHandler(client, channel));
+	}
+	
+	@Override
+	public void sendForget(Forget forget) {
+		if(send(forget))
+			client.setProtocolHandler(new InitClientProtocolHandler(client, channel));
 	}
 	
 	@Override
@@ -56,7 +49,7 @@ public class ActiveClientProtocolHandler extends AbstractClientProtocolHandler {
 	}
 	
 	@Override
-	public void handleAbort(Request request) {
+	public void handleAbort(Abort abort) {
 		// TODO 
 		Cheat.LOGGER.log(Level.INFO, "Server Abort handled. (not yet implemented)");
 	}

@@ -9,8 +9,15 @@ import client.state.InitClientProtocolHandler;
 import client.state.NotConnectedClientProtocolHandler;
 import io.AbstractIOEntity;
 import process.ProcessExecutor;
+import protocol.Abort;
+import protocol.Decline;
+import protocol.Forget;
+import protocol.Init;
+import protocol.Ok;
 import protocol.Reply;
 import protocol.Request;
+import protocol.StartService;
+import protocol.StopService;
 import util.Cheat;
 
 public class SimpleClient extends AbstractIOEntity implements Client {
@@ -21,9 +28,9 @@ public class SimpleClient extends AbstractIOEntity implements Client {
 	private SocketChannel channel;
 	private boolean connected;
 	private ClientProtocolHandler protocolHandler;
-	
+		
 	public SimpleClient(String hostname, int port) {
-		super();
+		super("Client " + Cheat.getId());
 		this.hostname = hostname;
 		this.port = port;
 		this.connected = false;
@@ -44,7 +51,7 @@ public class SimpleClient extends AbstractIOEntity implements Client {
 	
 	@Override
 	protected void start() throws IOException {
-		protocolHandler.sendInit();
+		protocolHandler.sendInit(new Init(getName(), ProcessExecutor.TASK_CAPACITY, ProcessExecutor.THREAD_CAPACITY));
 	}
 	
 	@Override
@@ -64,40 +71,40 @@ public class SimpleClient extends AbstractIOEntity implements Client {
 		return "Client "  + getName() + " " + Thread.currentThread().getId();
 	}
 
-	public void sendInit() {
-		protocolHandler.sendInit();
+	public void sendInit(Init init) {
+		protocolHandler.sendInit(init);
 	}
 
-	public void sendStartService() {
-		protocolHandler.sendStartService();
+	public void sendStartService(StartService startService) {
+		protocolHandler.sendStartService(startService);
 	}
 
-	public void sendStopService() {
-		protocolHandler.sendStopService();
+	public void sendStopService(StopService stopService) {
+		protocolHandler.sendStopService(stopService);
 	}
 
 	public void sendReply(Reply reply) {
 		protocolHandler.sendReply(reply);
 	}
 
-	public void sendDecline(Request request) {
-		protocolHandler.sendDecline(request);
+	public void sendDecline(Decline decline) {
+		protocolHandler.sendDecline(decline);
 	}
 
-	public void sendForget() {
-		protocolHandler.sendForget();
+	public void sendForget(Forget forget) {
+		protocolHandler.sendForget(forget);
 	}
 
 	public void handleRequest(Request request) {
 		protocolHandler.handleRequest(request);
 	}
 
-	public void handleOk() {
-		protocolHandler.handleOk();
+	public void handleOk(Ok ok) {
+		protocolHandler.handleOk(ok);
 	}
 
-	public void handleAbort(Request request) {
-		protocolHandler.handleAbort(request);
+	public void handleAbort(Abort abort) {
+		protocolHandler.handleAbort(abort);
 	}
 
 	@Override

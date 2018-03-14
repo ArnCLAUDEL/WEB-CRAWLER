@@ -2,7 +2,6 @@ package server;
 
 import io.IOEntity;
 import protocol.ClientIdentifier;
-import protocol.Reply;
 
 public interface Server extends IOEntity, ServerProtocolHandler {	
 	boolean addClient(ClientIdentifier clientId);

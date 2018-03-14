@@ -3,6 +3,8 @@ package client.state;
 import java.nio.channels.SocketChannel;
 
 import client.Client;
+import protocol.Ok;
+import protocol.StartService;
 
 public class InitSentClientProtocolHandler extends InitClientProtocolHandler {
 
@@ -11,9 +13,9 @@ public class InitSentClientProtocolHandler extends InitClientProtocolHandler {
 	}
 
 	@Override
-	public void handleOk() {
+	public void handleOk(Ok ok) {
 		client.setProtocolHandler(new InactiveClientProtocolHandler(client, channel));
-		client.sendStartService();
+		client.sendStartService(new StartService());
 	}
 	
 	@Override

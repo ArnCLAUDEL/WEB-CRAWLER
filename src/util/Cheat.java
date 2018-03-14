@@ -1,11 +1,7 @@
 package util;
 
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.util.Random;
-import java.util.Set;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -18,6 +14,10 @@ public class Cheat {
 	
 	public static void setLoggerLevelDisplay(Level level) {
 		setLoggerLevelDisplay(LOGGER, level);
+	}
+	
+	public static long getId() {
+		return RANDOM.nextInt();
 	}
 	
 	private static void setLoggerLevelDisplay(Logger logger, Level level) {

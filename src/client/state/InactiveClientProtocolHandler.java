@@ -1,12 +1,10 @@
 package client.state;
 
-import java.io.IOException;
 import java.nio.channels.SocketChannel;
-import java.util.logging.Level;
 
 import client.Client;
+import protocol.Forget;
 import protocol.StartService;
-import util.Cheat;
 
 public class InactiveClientProtocolHandler extends AbstractClientProtocolHandler {
 	
@@ -15,13 +13,15 @@ public class InactiveClientProtocolHandler extends AbstractClientProtocolHandler
 	}
 	
 	@Override
-	public void sendStartService() {
-		serializerBuffer.clear();
-		StartService startService = new StartService();
-		startService.writeToBuff(serializerBuffer);
-		serializerBuffer.flip();
-		if(send())
+	public void sendStartService(StartService startService) {
+		if(send(startService))
 			client.setProtocolHandler(new InactiveStartSentClientProtocolHandler(client, channel));
+	}
+	
+	@Override
+	public void sendForget(Forget forget) {
+		if(send(forget))
+			client.setProtocolHandler(new InitClientProtocolHandler(client, channel));
 	}
 	
 	@Override

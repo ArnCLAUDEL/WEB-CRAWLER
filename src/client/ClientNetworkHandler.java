@@ -7,7 +7,9 @@ import java.util.logging.Level;
 
 import io.AbstractNetworkHandler;
 import io.SerializerBuffer;
+import protocol.Abort;
 import protocol.Flag;
+import protocol.Ok;
 import protocol.Request;
 import util.Cheat;
 
@@ -43,29 +45,23 @@ public class ClientNetworkHandler extends AbstractNetworkHandler {
 		// TODO Auto-generated method stub
 		byte flag = serializerBuffer.get();
 		switch(flag) {
-			case Flag.OK: client.handleOk(); break;
+			case Flag.OK: handleOk(channel,serializerBuffer); break;
 			case Flag.REQUEST: handleRequest(channel, serializerBuffer); break;
 			case Flag.ABORT: handleAbort(channel, serializerBuffer); break;
 			default : Cheat.LOGGER.log(Level.WARNING, "Unknown protocol flag : " + flag);
 		}
 	}
 	
+	private void handleOk(SocketChannel channel, SerializerBuffer serializerBuffer) {
+		handleMessage(serializerBuffer, Ok.CREATOR, client::handleOk);	
+	}
+	
 	private void handleRequest(SocketChannel channel, SerializerBuffer serializerBuffer) {
-		// TODO
-		// Retrieve data
-		// Build a Request
-		// client.handleRequest(request);
-		Request request = Request.CREATOR.init();
-		request.readFromBuff(serializerBuffer);
-		client.handleRequest(request);
+		handleMessage(serializerBuffer, Request.CREATOR, client::handleRequest);
 	}
 	
 	private void handleAbort(SocketChannel channel, SerializerBuffer serializerBuffer) {
-		// TODO
-		// Retrieve data
-		// Build a Request
-		// client.handleAbort(request);
-		Cheat.LOGGER.log(Level.WARNING, "Handling Abort (not yet implemented)");
+		handleMessage(serializerBuffer, Abort.CREATOR, client::handleAbort);
 	}
 
 }

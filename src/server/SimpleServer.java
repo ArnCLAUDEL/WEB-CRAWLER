@@ -6,9 +6,16 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 
+import protocol.Abort;
 import protocol.ClientIdentifier;
+import protocol.Decline;
+import protocol.Forget;
+import protocol.Init;
+import protocol.Ok;
 import protocol.Reply;
 import protocol.Request;
+import protocol.StartService;
+import protocol.StopService;
 import server.state.ActiveServerProtocolHandler;
 import server.state.InactiveServerProtocolHandler;
 import util.Cheat;
@@ -63,44 +70,37 @@ public class SimpleServer extends AbstractServer {
 	public boolean isActive() {
 		return active;
 	}	
-
-	@Override
-	public String toString() {
-		return "Server " + Thread.currentThread().getId();
-	}
-
 	
-	
-	public boolean handleInit(ClientIdentifier clientId) {
-		return protocolHandler.handleInit(clientId);
+	public boolean handleInit(ClientIdentifier clientId, Init init) {
+		return protocolHandler.handleInit(clientId, init);
 	}
 
-	public void handleStartService(ClientIdentifier clientId) {
-		protocolHandler.handleStartService(clientId);
+	public void handleStartService(ClientIdentifier clientId, StartService startService) {
+		protocolHandler.handleStartService(clientId, startService);
 	}
 
-	public void handleStopService(ClientIdentifier clientId) {
-		protocolHandler.handleStopService(clientId);
+	public void handleStopService(ClientIdentifier clientId, StopService stopService) {
+		protocolHandler.handleStopService(clientId, stopService);
 	}
 
 	public void handleReply(ClientIdentifier clientId, Reply reply) {
 		protocolHandler.handleReply(clientId, reply);
 	}
 
-	public void handleForget(ClientIdentifier clientId) {
-		protocolHandler.handleForget(clientId);
+	public void handleForget(ClientIdentifier clientId, Forget forget) {
+		protocolHandler.handleForget(clientId, forget);
 	}
 
-	public void handleDecline(ClientIdentifier clientId, Request request) {
-		protocolHandler.handleDecline(clientId, request);
+	public void handleDecline(ClientIdentifier clientId, Decline decline) {
+		protocolHandler.handleDecline(clientId, decline);
 	}
 
-	public void sendOk(ClientIdentifier clientId) {
-		protocolHandler.sendOk(clientId);
+	public void sendOk(ClientIdentifier clientId, Ok ok) {
+		protocolHandler.sendOk(clientId, ok);
 	}
 
-	public void sendAbort(ClientIdentifier clientId, Request request) {
-		protocolHandler.sendAbort(clientId, request);
+	public void sendAbort(ClientIdentifier clientId, Abort abort) {
+		protocolHandler.sendAbort(clientId, abort);
 	}
 
 	public void sendRequest(ClientIdentifier clientId, Request request) {
@@ -138,7 +138,5 @@ public class SimpleServer extends AbstractServer {
 		else
 			activeClients.remove(clientId);
 	}
-
-
 	
 }

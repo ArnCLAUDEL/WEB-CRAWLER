@@ -12,8 +12,11 @@ import io.AbstractNetworkHandler;
 import io.SerializerBuffer;
 import protocol.ClientIdentifier;
 import protocol.Flag;
+import protocol.Forget;
 import protocol.Init;
 import protocol.Reply;
+import protocol.StartService;
+import protocol.StopService;
 import util.Cheat;
 
 public class ServerNetworkHandler extends AbstractNetworkHandler {
@@ -68,34 +71,41 @@ public class ServerNetworkHandler extends AbstractNetworkHandler {
 		ClientIdentifier clientId = clients.get(channel);		
 		
 		switch(flag) {
-			case Flag.FORGET: server.handleForget(clientId); break;
-			case Flag.START_SERVICE: server.handleStartService(clientId); break;
-			case Flag.STOP_SERVICE: server.handleStopService(clientId); break;
-			case Flag.REPLY : handleReply(clients.get(channel));  break;
+			case Flag.FORGET: handleForget(clientId, serializerBuffer); break;
+			case Flag.START_SERVICE: handleStartService(clientId, serializerBuffer); break;
+			case Flag.STOP_SERVICE: handleStopService(clientId, serializerBuffer); break;
+			case Flag.REPLY : handleReply(clientId, serializerBuffer);  break;
 			default : Cheat.LOGGER.log(Level.WARNING, "Unknown protocol flag : " + flag);
 		}		
 	}
 	
-	
 	private void handleInit(SocketChannel channel, SerializerBuffer serializerBuffer) {
-		Init initMessage = Init.CREATOR.init();
-		initMessage.readFromBuff(serializerBuffer);
+		Init init = Init.CREATOR.init();
+		init.readFromBuff(serializerBuffer);
 		
-		ClientIdentifier clientId = new ClientIdentifier.BUILDER(initMessage.getName(), channel)
-														.nbTaskMax(initMessage.getNbTaskMax())
-														.nbProcessUnits(initMessage.getNbProcessUnits())
+		ClientIdentifier clientId = new ClientIdentifier.BUILDER(init.getName(), channel)
+														.nbTaskMax(init.getNbTaskMax())
+														.nbProcessUnits(init.getNbProcessUnits())
 														.build();
 		
-		if(server.handleInit(clientId))
+		if(server.handleInit(clientId, init))
 			this.clients.put(channel, clientId);
 	}
 	
-	private void handleReply(ClientIdentifier clientId) {
-		// TODO
-		/* 	Retrieve data
-		 	Build a Reply
-		 */
-		server.handleReply(clientId, new Reply());
+	private void handleForget(ClientIdentifier clientId, SerializerBuffer serializerBuffer) {
+		handleMessage(serializerBuffer, clientId, Forget.CREATOR, server::handleForget);
+	}
+	
+	private void handleReply(ClientIdentifier clientId, SerializerBuffer serializerBuffer ) {
+		handleMessage(serializerBuffer, clientId, Reply.CREATOR, server::handleReply);
+	}
+	
+	private void handleStartService(ClientIdentifier clientId, SerializerBuffer serializerBuffer ) {
+		handleMessage(serializerBuffer, clientId, StartService.CREATOR, server::handleStartService);
+	}
+	
+	private void handleStopService(ClientIdentifier clientId, SerializerBuffer serializerBuffer ) {
+		handleMessage(serializerBuffer, clientId, StopService.CREATOR, server::handleStopService);
 	}
 
 }
