@@ -9,6 +9,7 @@ public class Request extends Message {
 	private String hostname;
 	
 	public Request(String hostname) {
+		super(Flag.REQUEST);
 		this.hostname = hostname;
 	}
 	
@@ -16,16 +17,18 @@ public class Request extends Message {
 		this("www.example.com");
 	}
 	
+	public String getHostname() {
+		return hostname;
+	}
+	
 	@Override
 	public void writeToBuff(SerializerBuffer ms) {
-		ms.write(Flag.REQUEST); 
 		ms.writeString(hostname);
 	}
 
 	@Override
 	public void readFromBuff(SerializerBuffer ms) {
 		this.hostname = ms.getString();
-		
 	}
 
 }

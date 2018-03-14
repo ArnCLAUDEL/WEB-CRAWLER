@@ -107,15 +107,19 @@ public abstract class AbstractNetworkHandler extends AbstractHandler implements 
 	protected abstract void handleProtocol(SocketChannel channel, SerializerBuffer serializerBuffer);
 	
 	protected <M extends Message> void handleMessage(SerializerBuffer serializerBuffer, Creator<M> messageCreator, Consumer<M> handler) {
+		// TODO
 		M message = messageCreator.init();
 		message.readFromBuff(serializerBuffer);
 		handler.accept(message);
+		serializerBuffer.clear();
 	}
 	
 	protected <M extends Message,T> void handleMessage(SerializerBuffer serializerBuffer, T info, Creator<M> messageCreator, BiConsumer<T,M> handler) {
+		// TODO warning limit, clear()
 		M message = messageCreator.init();
 		message.readFromBuff(serializerBuffer);
 		handler.accept(info, message);
+		serializerBuffer.clear();
 	}
 	
 	@Override

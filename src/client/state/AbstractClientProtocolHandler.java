@@ -42,6 +42,7 @@ public abstract class AbstractClientProtocolHandler implements ClientProtocolHan
 	
 	protected boolean send(Message message) {
 		serializerBuffer.clear();
+		serializerBuffer.put(message.getFlag());
 		message.writeToBuff(serializerBuffer);
 		serializerBuffer.flip();
 		if(send()) {

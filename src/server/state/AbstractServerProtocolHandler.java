@@ -41,6 +41,7 @@ public abstract class AbstractServerProtocolHandler implements ServerProtocolHan
 	
 	protected boolean send(ClientIdentifier clientId, Message message) {
 		serializerBuffer.clear();
+		serializerBuffer.put(message.getFlag());
 		message.writeToBuff(serializerBuffer);
 		serializerBuffer.flip();
 		if(send(clientId)) {

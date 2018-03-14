@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import io.AbstractNetworkHandler;
 import io.SerializerBuffer;
 import protocol.ClientIdentifier;
+import protocol.Decline;
 import protocol.Flag;
 import protocol.Forget;
 import protocol.Init;
@@ -28,6 +29,11 @@ public class ServerNetworkHandler extends AbstractNetworkHandler {
 		super(channel, SelectionKey.OP_ACCEPT, server);
 		this.server = server;
 		this.clients = new HashMap<>();
+	}
+	
+	private void remove(SocketChannel channel) {
+		ClientIdentifier clientId = this.clients.remove(channel);
+		server.removeClient(clientId);
 	}
 	
 	@Override
@@ -49,6 +55,7 @@ public class ServerNetworkHandler extends AbstractNetworkHandler {
 		SocketChannel sc = (SocketChannel) sk.channel();
 		try {
 			if(serializerBuffer.read(sc) < 0) {
+				remove(sc);
 				sk.cancel();
 				sc.close();
 				Cheat.LOGGER.log(Level.INFO, "Client disconnected.");
@@ -60,6 +67,7 @@ public class ServerNetworkHandler extends AbstractNetworkHandler {
 			Cheat.LOGGER.log(Level.WARNING, e.getMessage(), e);
 		}
 	}
+	
 	
 	protected void handleProtocol(SocketChannel channel, SerializerBuffer serializerBuffer) {
 		// TODO
@@ -75,6 +83,7 @@ public class ServerNetworkHandler extends AbstractNetworkHandler {
 			case Flag.START_SERVICE: handleStartService(clientId, serializerBuffer); break;
 			case Flag.STOP_SERVICE: handleStopService(clientId, serializerBuffer); break;
 			case Flag.REPLY : handleReply(clientId, serializerBuffer);  break;
+			case Flag.DECLINE : handleDecline(clientId, serializerBuffer);  break;
 			default : Cheat.LOGGER.log(Level.WARNING, "Unknown protocol flag : " + flag);
 		}		
 	}
@@ -106,6 +115,10 @@ public class ServerNetworkHandler extends AbstractNetworkHandler {
 	
 	private void handleStopService(ClientIdentifier clientId, SerializerBuffer serializerBuffer ) {
 		handleMessage(serializerBuffer, clientId, StopService.CREATOR, server::handleStopService);
+	}
+	
+	private void handleDecline(ClientIdentifier clientId, SerializerBuffer serializerBuffer ) {
+		handleMessage(serializerBuffer, clientId, Decline.CREATOR, server::handleDecline);
 	}
 
 }

@@ -8,9 +8,12 @@ public class Ok extends Message {
 
 	private long id;
 	
-	private Ok() {}
+	private Ok() {
+		super(Flag.OK);
+	}
 	
 	public Ok(long id) {
+		this();
 		this.id = id;
 	}
 
@@ -20,7 +23,7 @@ public class Ok extends Message {
 	
 	@Override
 	public void writeToBuff(SerializerBuffer ms) {
-		ms.write(Flag.OK);
+		
 	}
 
 	@Override

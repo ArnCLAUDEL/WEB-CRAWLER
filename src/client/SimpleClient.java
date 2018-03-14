@@ -3,6 +3,9 @@ package client;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 
 import client.state.InitClientProtocolHandler;
@@ -24,6 +27,7 @@ public class SimpleClient extends AbstractIOEntity implements Client {
 
 	private final String hostname;
 	private final int port;
+	private final ProcessExecutor executor;
 	
 	private SocketChannel channel;
 	private boolean connected;
@@ -33,8 +37,14 @@ public class SimpleClient extends AbstractIOEntity implements Client {
 		super("Client " + Cheat.getId());
 		this.hostname = hostname;
 		this.port = port;
+		this.executor = new ProcessExecutor();
 		this.connected = false;
 		this.protocolHandler = new NotConnectedClientProtocolHandler(this);
+	}
+	
+	@Override
+	public Future<Set<String>> scan(String hostname) {
+		return executor.scan(hostname);
 	}
 	
 	@Override

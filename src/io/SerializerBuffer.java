@@ -124,18 +124,101 @@ public class SerializerBuffer {
 		return new SerializerBuffer(buffer.slice());
 	}
 	
-	public void write(byte b) {
+	
+	
+	public final int position() {
+		return buffer.position();
+	}
+
+	public final int remaining() {
+		return buffer.remaining();
+	}
+
+	public SerializerBuffer put(byte b) {
 		buffer.put(b);
+		return this;
 	}
-	
-	public void writeInt(int i) {
-		buffer.putInt(i);
+
+	public SerializerBuffer put(int index, byte b) {
+		buffer.put(index, b);
+		return this;
 	}
-	
-	public void writeFloat(float f) {
-		buffer.putFloat(f);
+
+	public SerializerBuffer put(ByteBuffer src) {
+		buffer.put(src);
+		return this;
 	}
-	
+
+	public SerializerBuffer put(byte[] src, int offset, int length) {
+		buffer.put(src, offset, length);
+		return this;
+	}
+
+	public final SerializerBuffer put(byte[] src) {
+		buffer.put(src);
+		return this;
+	}
+
+	public SerializerBuffer putChar(char value) {
+		buffer.putChar(value);
+		return this;
+	}
+
+	public SerializerBuffer putChar(int index, char value) {
+		buffer.putChar(index, value);
+		return this;
+	}
+
+	public SerializerBuffer putShort(short value) {
+		buffer.putShort(value);
+		return this;
+	}
+
+	public SerializerBuffer putShort(int index, short value) {
+		buffer.putShort(index, value);
+		return this;
+	}
+
+	public SerializerBuffer putInt(int value) {
+		buffer.putInt(value);
+		return this;
+	}
+
+	public SerializerBuffer putInt(int index, int value) {
+		buffer.putInt(index, value);
+		return this;
+	}
+
+	public SerializerBuffer putLong(long value) {
+		buffer.putLong(value);
+		return this;
+	}
+
+	public SerializerBuffer putLong(int index, long value) {
+		buffer.putLong(index, value);
+		return this;
+	}
+
+	public SerializerBuffer putFloat(float value) {
+		buffer.putFloat(value);
+		return this;
+	}
+
+	public SerializerBuffer putFloat(int index, float value) {
+		buffer.putFloat(index, value);
+		return this;
+	}
+
+	public SerializerBuffer putDouble(double value) {
+		buffer.putDouble(value);
+		return this;
+	}
+
+	public SerializerBuffer putDouble(int index, double value) {
+		buffer.putDouble(index, value);
+		return this;
+	}
+
 	public void writeString(String s) {
 		buffer.putInt(s.length());
 		buffer.put(Cheat.CHARSET.encode(s));

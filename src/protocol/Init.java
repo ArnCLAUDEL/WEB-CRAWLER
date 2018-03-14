@@ -10,9 +10,12 @@ public class Init extends Message {
 	private int nbTaskMax;
 	private int nbProcessUnits;
 	
-	private Init() {}
+	private Init() {
+		super(Flag.INIT);
+	}
 	
-	public Init(String name, int nbTaskMax, int nbProcessUnits) {		
+	public Init(String name, int nbTaskMax, int nbProcessUnits) {
+		this();
 		this.name = name;
 		this.nbTaskMax = nbTaskMax;
 		this.nbProcessUnits = nbProcessUnits;
@@ -32,10 +35,9 @@ public class Init extends Message {
 
 	@Override
 	public void writeToBuff(SerializerBuffer ms) {
-		ms.write(Flag.INIT);
 		ms.writeString(name);
-		ms.writeInt(nbTaskMax);
-		ms.writeInt(nbProcessUnits);
+		ms.putInt(nbTaskMax);
+		ms.putInt(nbProcessUnits);
 	}
 
 	@Override

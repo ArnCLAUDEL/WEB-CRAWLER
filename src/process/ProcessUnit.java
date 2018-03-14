@@ -59,6 +59,7 @@ public class ProcessUnit implements Callable<Set<String>>{
 	public Set<String> call() throws IOException {
 		Cheat.LOGGER.log(Level.FINE, "Unit " + Thread.currentThread().getId() + " is starting");
 		URLConnection uc = connect(hostname);
+		Cheat.LOGGER.log(Level.FINE, "Unit " + Thread.currentThread().getId() + " connected to " + hostname);
 		Set<String> links = getContent(uc.getInputStream());
 		Cheat.LOGGER.log(Level.FINE, "Unit " + Thread.currentThread().getId() + " has found " + links.size() + " links from url: " + hostname);
 		return links;

@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 
+import process.ProcessUnit;
 import protocol.Abort;
 import protocol.ClientIdentifier;
 import protocol.Decline;
@@ -41,9 +42,14 @@ public class SimpleServer extends AbstractServer {
 	@Override
 	public void scan(String hostname) {
 		Cheat.LOGGER.log(Level.INFO, "Preparing request.");
-		Request request = new Request(hostname);
-		activeClients	.stream()
-						.forEach(c -> protocolHandler.sendRequest(c, request));
+		
+		for(int i = 0; i < 200; i++) {
+			Request request = new Request("https://en.wiktionary.org/wiki/"+i);
+			activeClients	.stream()
+							.forEach(c -> protocolHandler.sendRequest(c, request));
+		}
+		
+		
 		Cheat.LOGGER.log(Level.INFO, "Request sent to clients.");
 	}
 	
@@ -128,6 +134,7 @@ public class SimpleServer extends AbstractServer {
 
 	@Override
 	public void removeClient(ClientIdentifier clientId) {
+		activeClients.remove(clientId);
 		clients.remove(clientId);
 	}
 
