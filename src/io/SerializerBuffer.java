@@ -36,25 +36,14 @@ public class SerializerBuffer {
 		this.overflowCallback = Optional.ofNullable(callback);
 	}
 	
-	public <T> T handleOverflow(Supplier<? extends T> f) {
+	public <T> T handleFlowException(Supplier<T> supplier) {
 		buffer.mark();
 		try {
-			return f.get();
-		} catch (BufferOverflowException e) {
+			return supplier.get();
+		} catch (BufferOverflowException | BufferUnderflowException e) {
 			buffer.reset();
 			overflowCallback.orElseThrow(() -> e).accept(this);
-			return handleOverflow(f);
-		}
-	}
-	
-	public <T> T handleUnderflow(Supplier<? extends T> f) {
-		buffer.mark();
-		try {
-			return f.get();
-		} catch (BufferUnderflowException e) {
-			buffer.reset();
-			overflowCallback.orElseThrow(() -> e).accept(this);
-			return handleUnderflow(f);
+			return handleFlowException(supplier);
 		}
 	}
 	
@@ -163,8 +152,6 @@ public class SerializerBuffer {
 		return new SerializerBuffer(buffer.slice());
 	}
 	
-	
-	
 	public final int position() {
 		return buffer.position();
 	}
@@ -260,7 +247,7 @@ public class SerializerBuffer {
 
 	// TODO
 	public void putString(String s) {
-		handleOverflow(() -> {
+		handleFlowException(() -> {
 			buffer.putInt(s.length());
 			buffer.put(Cheat.CHARSET.encode(s));
 			return Void.TYPE;
@@ -268,7 +255,7 @@ public class SerializerBuffer {
 	}
 	
 	public String getString() {
-		return handleUnderflow(() -> {
+		return handleFlowException(() -> {
 			int length = buffer.getInt();
 			int limit = buffer.limit();
 			if(buffer.position()+length > buffer.limit())

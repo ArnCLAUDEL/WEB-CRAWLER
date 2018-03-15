@@ -26,8 +26,7 @@ public class AbstractProtocolHandler {
 		}
 	}
 	
-	
-	// TODO server side + proxy
+	// TODO 
 	protected Consumer<? super SerializerBuffer> getFlushCallback(SocketChannel channel) {
 		return (serializerBuffer) -> {
 			serializerBuffer.flip();
