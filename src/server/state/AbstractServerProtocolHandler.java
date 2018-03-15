@@ -1,10 +1,9 @@
 package server.state;
 
-import java.io.IOException;
 import java.util.logging.Level;
 
-import io.SerializerBuffer;
 import protocol.Abort;
+import protocol.AbstractProtocolHandler;
 import protocol.ClientIdentifier;
 import protocol.Decline;
 import protocol.Forget;
@@ -19,36 +18,17 @@ import server.Server;
 import server.ServerProtocolHandler;
 import util.Cheat;
 
-public abstract class AbstractServerProtocolHandler implements ServerProtocolHandler {
+public abstract class AbstractServerProtocolHandler extends AbstractProtocolHandler implements ServerProtocolHandler {
 
 	protected final Server server;
-	protected final SerializerBuffer serializerBuffer;
 	
 	public AbstractServerProtocolHandler(Server server) {
+		super();
 		this.server = server;
-		this.serializerBuffer = new SerializerBuffer();
-	}
-	
-	protected boolean send(ClientIdentifier clientId) {
-		try {
-			serializerBuffer.write(clientId.getChannel());
-			return true;
-		} catch (IOException e) {
-			Cheat.LOGGER.log(Level.WARNING, "Failed to send message from " + server +  " to " + clientId.getName(), e);
-			return false;
-		}
 	}
 	
 	protected boolean send(ClientIdentifier clientId, Message message) {
-		serializerBuffer.clear();
-		serializerBuffer.put(message.getFlag());
-		message.writeToBuff(serializerBuffer);
-		serializerBuffer.flip();
-		if(send(clientId)) {
-			Cheat.LOGGER.log(Level.FINER, message + " sent.");
-			return true;
-		}
-		return false;
+		return send(clientId.getChannel(), message);
 	}
 	
 	@Override

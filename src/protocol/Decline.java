@@ -17,7 +17,6 @@ public class Decline extends Message {
 		this.request = request;
 	}
 	
-	
 	@Override
 	public void writeToBuff(SerializerBuffer ms) {
 		request.writeToBuff(ms);

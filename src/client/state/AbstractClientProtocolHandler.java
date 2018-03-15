@@ -1,13 +1,12 @@
 package client.state;
 
-import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
 
 import client.Client;
 import client.ClientProtocolHandler;
-import io.SerializerBuffer;
 import protocol.Abort;
+import protocol.AbstractProtocolHandler;
 import protocol.Decline;
 import protocol.Forget;
 import protocol.Init;
@@ -19,37 +18,18 @@ import protocol.StartService;
 import protocol.StopService;
 import util.Cheat;
 
-public abstract class AbstractClientProtocolHandler implements ClientProtocolHandler {
+public abstract class AbstractClientProtocolHandler extends AbstractProtocolHandler implements ClientProtocolHandler {
 	protected final Client client;
 	protected final SocketChannel channel;
-	protected final SerializerBuffer serializerBuffer;
 	
 	public AbstractClientProtocolHandler(Client client, SocketChannel channel) {
+		super();
 		this.client = client;
 		this.channel = channel;
-		this.serializerBuffer = new SerializerBuffer();
-	}
-	
-	protected boolean send() {
-		try {
-			serializerBuffer.write(channel);
-			return true;
-		} catch (IOException e) {
-			Cheat.LOGGER.log(Level.WARNING, "Failed to send message from " + client, e);
-			return false;
-		}
 	}
 	
 	protected boolean send(Message message) {
-		serializerBuffer.clear();
-		serializerBuffer.put(message.getFlag());
-		message.writeToBuff(serializerBuffer);
-		serializerBuffer.flip();
-		if(send()) {
-			Cheat.LOGGER.log(Level.FINER, message + " sent.");
-			return true;
-		}
-		return false;
+		return send(channel, message);
 	}
 	
 	@Override

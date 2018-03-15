@@ -13,4 +13,6 @@ public interface Client extends IOEntity, ClientProtocolHandler  {
 	void setProtocolHandler(ClientProtocolHandler protocolHandler);
 	int getNbProcessUnits();
 	int getNbTaskMax();
+	void setId(long id);
+	long getId();
 }

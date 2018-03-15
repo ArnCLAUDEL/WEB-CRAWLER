@@ -29,17 +29,32 @@ public class SimpleClient extends AbstractIOEntity implements Client {
 	private final int port;
 	private final ProcessExecutor executor;
 	
+	private long id;
 	private SocketChannel channel;
 	private boolean connected;
 	private ClientProtocolHandler protocolHandler;
-		
-	public SimpleClient(String hostname, int port) {
+	
+	public SimpleClient(String hostname, int port, long previousId) {
 		super("Client " + Cheat.getId());
+		this.id = previousId;
 		this.hostname = hostname;
 		this.port = port;
 		this.executor = new ProcessExecutor();
 		this.connected = false;
 		this.protocolHandler = new NotConnectedClientProtocolHandler(this);
+	}
+	
+	public SimpleClient(String hostname, int port) {
+		this(hostname, port, Cheat.DEFAULT_ID);
+	}
+	
+	@Override
+	public void setId(long id) {
+		this.id = id;
+	}
+	
+	public long getId() {
+		return id;
 	}
 	
 	@Override
@@ -61,7 +76,7 @@ public class SimpleClient extends AbstractIOEntity implements Client {
 	
 	@Override
 	protected void start() throws IOException {
-		protocolHandler.sendInit(new Init(getName(), ProcessExecutor.TASK_CAPACITY, ProcessExecutor.THREAD_CAPACITY));
+		protocolHandler.sendInit(new Init(getName(), ProcessExecutor.TASK_CAPACITY, ProcessExecutor.THREAD_CAPACITY, id));
 	}
 	
 	@Override

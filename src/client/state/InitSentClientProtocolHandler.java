@@ -16,6 +16,7 @@ public class InitSentClientProtocolHandler extends InitClientProtocolHandler {
 
 	@Override
 	public void handleOk(Ok ok) {
+		client.setId(ok.getId());
 		client.setProtocolHandler(new InactiveClientProtocolHandler(client, channel));
 		client.sendStartService(new StartService());
 	}
