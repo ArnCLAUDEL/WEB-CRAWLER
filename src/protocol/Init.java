@@ -45,7 +45,7 @@ public class Init extends Message {
 
 	@Override
 	public void writeToBuff(SerializerBuffer ms) {
-		ms.writeString(name);
+		ms.putString(name);
 		ms.putInt(nbTaskMax);
 		ms.putInt(nbProcessUnits);
 	}

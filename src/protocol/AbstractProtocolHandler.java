@@ -15,7 +15,7 @@ public class AbstractProtocolHandler {
 		this.serializerBuffer = new SerializerBuffer();
 	}
 	
-	protected boolean send(SocketChannel channel) {
+	private boolean send(SocketChannel channel) {
 		try {
 			serializerBuffer.write(channel);
 			return true;
@@ -25,7 +25,7 @@ public class AbstractProtocolHandler {
 		}
 	}
 	
-	protected boolean send(SocketChannel channel, Message message) {
+	protected synchronized boolean send(SocketChannel channel, Message message) {
 		serializerBuffer.clear();
 		serializerBuffer.put(message.getFlag());
 		message.writeToBuff(serializerBuffer);

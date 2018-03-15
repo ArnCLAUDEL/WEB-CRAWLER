@@ -45,7 +45,6 @@ public class ActiveClientProtocolHandler extends AbstractClientProtocolHandler {
 	public void handleRequest(Request request) {
 		// TODO 
 		client.scan(request.getHostname());
-		sendReply(new Reply());
 		Cheat.LOGGER.log(Level.INFO, "Server Request handled.");		
 	}
 	

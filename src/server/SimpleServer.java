@@ -43,12 +43,16 @@ public class SimpleServer extends AbstractServer {
 	public void scan(String hostname) {
 		Cheat.LOGGER.log(Level.INFO, "Preparing request.");
 		
+		Request request = new Request("https://en.wiktionary.org/wiki/Captain_Obvious");
+		activeClients	.stream()
+		.forEach(c -> protocolHandler.sendRequest(c, request));
+		/*
 		for(int i = 0; i < 200; i++) {
 			Request request = new Request("https://en.wiktionary.org/wiki/"+i);
 			activeClients	.stream()
 							.forEach(c -> protocolHandler.sendRequest(c, request));
 		}
-		
+		*/
 		
 		Cheat.LOGGER.log(Level.INFO, "Request sent to clients.");
 	}

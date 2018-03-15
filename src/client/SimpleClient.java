@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
@@ -58,8 +59,21 @@ public class SimpleClient extends AbstractIOEntity implements Client {
 	}
 	
 	@Override
-	public Future<Set<String>> scan(String hostname) {
-		return executor.scan(hostname);
+	public void scan(String hostname) {
+		Future<Set<String>> future = executor.scan(hostname);
+		CompletableFuture.supplyAsync(() -> {
+			try {
+				return future.get();
+			} catch (InterruptedException | ExecutionException e) {
+				Cheat.LOGGER.log(Level.WARNING, e.getMessage(), e);
+			}
+			return null;
+		}).thenAccept(urls -> {
+			Reply reply = new Reply(hostname, urls);
+			sendReply(reply);
+		}).whenComplete((v,e) -> {
+			Cheat.LOGGER.log(Level.WARNING, e.getMessage(), e);
+		});
 	}
 	
 	@Override
@@ -139,7 +153,7 @@ public class SimpleClient extends AbstractIOEntity implements Client {
 	}
 
 	public static void main(String[] args) throws IOException {
-		Cheat.setLoggerLevelDisplay(Level.ALL);
+		Cheat.setLoggerLevelDisplay(Level.FINER);
 		
 		Client client = new SimpleClient("localhost", 8080);
 		Thread t1;

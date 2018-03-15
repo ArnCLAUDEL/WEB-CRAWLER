@@ -219,7 +219,7 @@ public class SerializerBuffer {
 		return this;
 	}
 
-	public void writeString(String s) {
+	public void putString(String s) {
 		buffer.putInt(s.length());
 		buffer.put(Cheat.CHARSET.encode(s));
 	}

@@ -23,7 +23,7 @@ public class Request extends Message {
 	
 	@Override
 	public void writeToBuff(SerializerBuffer ms) {
-		ms.writeString(hostname);
+		ms.putString(hostname);
 	}
 
 	@Override
