@@ -26,6 +26,7 @@ public abstract class AbstractClientProtocolHandler extends AbstractProtocolHand
 		super();
 		this.client = client;
 		this.channel = channel;
+		this.serializerBuffer.setOverflowCallback(getFlushCallback(channel));
 	}
 	
 	protected boolean send(Message message) {

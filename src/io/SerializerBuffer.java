@@ -1,9 +1,14 @@
 package io;
 
 import java.io.IOException;
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import util.Cheat;
 
@@ -12,8 +17,11 @@ public class SerializerBuffer {
 	
 	private final ByteBuffer buffer;
 	
+	private Optional<Consumer<? super SerializerBuffer>> overflowCallback;
+	
 	private SerializerBuffer(ByteBuffer buffer) {
 		this.buffer = buffer;
+		this.overflowCallback = Optional.empty();
 	}
 	
 	public SerializerBuffer(int size) {
@@ -22,6 +30,32 @@ public class SerializerBuffer {
 	
 	public SerializerBuffer() {
 		this(BUFFER_SIZE);
+	}
+	
+	public void setOverflowCallback(Consumer<? super SerializerBuffer> callback) {
+		this.overflowCallback = Optional.ofNullable(callback);
+	}
+	
+	public <T> T handleOverflow(Supplier<? extends T> f) {
+		buffer.mark();
+		try {
+			return f.get();
+		} catch (BufferOverflowException e) {
+			buffer.reset();
+			overflowCallback.orElseThrow(() -> e).accept(this);
+			return handleOverflow(f);
+		}
+	}
+	
+	public <T> T handleUnderflow(Supplier<? extends T> f) {
+		buffer.mark();
+		try {
+			return f.get();
+		} catch (BufferUnderflowException e) {
+			buffer.reset();
+			overflowCallback.orElseThrow(() -> e).accept(this);
+			return handleUnderflow(f);
+		}
 	}
 	
 	public ByteBuffer getBuffer() {
@@ -34,6 +68,11 @@ public class SerializerBuffer {
 	
 	public int write(WritableByteChannel channel) throws IOException {
 		return channel.write(buffer);
+	}
+	
+	public SerializerBuffer compact() {
+		buffer.compact();
+		return this;
 	}
 	
 	public SerializerBuffer flip() {
@@ -219,18 +258,26 @@ public class SerializerBuffer {
 		return this;
 	}
 
+	// TODO
 	public void putString(String s) {
-		buffer.putInt(s.length());
-		buffer.put(Cheat.CHARSET.encode(s));
+		handleOverflow(() -> {
+			buffer.putInt(s.length());
+			buffer.put(Cheat.CHARSET.encode(s));
+			return Void.TYPE;
+		});
 	}
 	
 	public String getString() {
-		int length = buffer.getInt();
-		int limit = buffer.limit();
-		buffer.limit(buffer.position()+length);
-		String s = Cheat.CHARSET.decode(buffer).toString();
-		buffer.limit(limit);
-		return s;
+		return handleUnderflow(() -> {
+			int length = buffer.getInt();
+			int limit = buffer.limit();
+			if(buffer.position()+length > buffer.limit())
+				throw new BufferUnderflowException();
+			buffer.limit(buffer.position()+length);
+			String s = Cheat.CHARSET.decode(buffer).toString();
+			buffer.limit(limit);
+			return s;
+		});		
 	}
 	
 	@Override

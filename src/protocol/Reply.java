@@ -27,6 +27,14 @@ public class Reply extends Message {
 		this.urls = urls;
 	}
 	
+	public String getHostname() {
+		return hostname;
+	}
+	
+	public Set<String> getUrls() {
+		return urls;
+	}
+	
 	@Override
 	public void writeToBuff(SerializerBuffer ms) {
 		ms.putString(hostname);

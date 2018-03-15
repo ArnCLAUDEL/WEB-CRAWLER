@@ -41,6 +41,7 @@ public class ServerNetworkHandler extends AbstractNetworkHandler {
 		try {
 			SocketChannel socket = ((ServerSocketChannel) sk.channel()).accept();
 			addChannel(socket, SelectionKey.OP_READ);
+			getSerializerBuffer(socket).setOverflowCallback(serializerBufferFiller(socket));
 			Cheat.LOGGER.log(Level.INFO,"Connection from " + socket.getRemoteAddress() + " accepted");
 		} catch (IOException e) {
 			Cheat.LOGGER.log(Level.WARNING, e.getMessage(), e);

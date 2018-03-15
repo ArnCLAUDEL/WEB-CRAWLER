@@ -72,7 +72,8 @@ public class ActiveServerProtocolHandler extends AbstractServerProtocolHandler {
 	@Override
 	public void handleReply(ClientIdentifier clientId, Reply reply) {
 		// TODO
-		Cheat.LOGGER.log(Level.INFO, "Client Reply handled. (Not yet implemented)");
+		reply.getUrls().stream().forEach(System.out::println);
+		Cheat.LOGGER.log(Level.INFO, "Client Reply handled.");
 	}
 	
 	@Override

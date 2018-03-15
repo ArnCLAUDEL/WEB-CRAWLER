@@ -2,6 +2,7 @@ package protocol;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 import io.SerializerBuffer;
@@ -9,20 +10,34 @@ import util.Cheat;
 
 public class AbstractProtocolHandler {
 	
-	private final SerializerBuffer serializerBuffer;
+	protected final SerializerBuffer serializerBuffer;
 	
 	public AbstractProtocolHandler() {
 		this.serializerBuffer = new SerializerBuffer();
 	}
 	
-	private boolean send(SocketChannel channel) {
+	protected boolean send(SerializerBuffer serializerBuffer, SocketChannel channel) {
 		try {
-			serializerBuffer.write(channel);
+			System.out.println(serializerBuffer.write(channel));
 			return true;
 		} catch (IOException e) {
 			Cheat.LOGGER.log(Level.WARNING, "Failed to send message.", e);
 			return false;
 		}
+	}
+	
+	
+	// TODO server side + proxy
+	protected Consumer<? super SerializerBuffer> getFlushCallback(SocketChannel channel) {
+		return (serializerBuffer) -> {
+			serializerBuffer.flip();
+			send(serializerBuffer, channel);
+			serializerBuffer.clear();
+		};
+	}
+	
+	protected boolean send(SocketChannel channel) {
+		return send(serializerBuffer, channel);
 	}
 	
 	protected synchronized boolean send(SocketChannel channel, Message message) {

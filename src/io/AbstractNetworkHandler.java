@@ -1,6 +1,7 @@
 package io;
 
 import java.io.IOException;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -40,6 +41,19 @@ public abstract class AbstractNetworkHandler extends AbstractHandler implements 
 	
 	protected SerializerBuffer getSerializerBuffer(SelectableChannel channel) {
 		return channelBuffers.get(channel);
+	}
+	
+	protected Consumer<? super SerializerBuffer> serializerBufferFiller(ReadableByteChannel channel) {
+		return (serializerBuffer) -> {
+			try {
+				serializerBuffer.compact();
+				serializerBuffer.read(channel);
+				serializerBuffer.flip();
+			} catch (IOException e) {
+				Cheat.LOGGER.log(Level.WARNING, "Error while re-filling buffer.", e);
+			}
+			
+		};
 	}
 	
 	@Override
@@ -115,7 +129,7 @@ public abstract class AbstractNetworkHandler extends AbstractHandler implements 
 	}
 	
 	protected <M extends Message,T> void handleMessage(SerializerBuffer serializerBuffer, T info, Creator<M> messageCreator, BiConsumer<T,M> handler) {
-		// TODO warning limit, clear()
+		// TODO 
 		M message = messageCreator.init();
 		message.readFromBuff(serializerBuffer);
 		handler.accept(info, message);
