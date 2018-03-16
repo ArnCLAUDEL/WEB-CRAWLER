@@ -18,10 +18,12 @@ public class SerializerBuffer {
 	private final ByteBuffer buffer;
 	
 	private Optional<Consumer<? super SerializerBuffer>> overflowCallback;
+	private Optional<Consumer<? super SerializerBuffer>> underflowCallback;
 	
 	private SerializerBuffer(ByteBuffer buffer) {
 		this.buffer = buffer;
 		this.overflowCallback = Optional.empty();
+		this.underflowCallback = Optional.empty();
 	}
 	
 	public SerializerBuffer(int size) {
@@ -36,15 +38,25 @@ public class SerializerBuffer {
 		this.overflowCallback = Optional.ofNullable(callback);
 	}
 	
-	public <T> T handleFlowException(Supplier<T> supplier) {
+	public void setUnderflowCallback(Consumer<? super SerializerBuffer> callback) {
+		this.underflowCallback = Optional.ofNullable(callback);
+	}
+	
+	private <T> T tryFlowException(Supplier<? extends T> supplier) {
 		buffer.mark();
 		try {
 			return supplier.get();
-		} catch (BufferOverflowException | BufferUnderflowException e) {
-			buffer.reset();
-			overflowCallback.orElseThrow(() -> e).accept(this);
-			return handleFlowException(supplier);
+		} catch (BufferOverflowException e) {
+			return handleFlowException(overflowCallback.orElseThrow(() -> e), supplier);
+		} catch (BufferUnderflowException e) {
+			return handleFlowException(underflowCallback.orElseThrow(() -> e), supplier);
 		}
+	}
+	
+	private <T> T handleFlowException(Consumer<? super SerializerBuffer> callback, Supplier<? extends T> supplier) {
+		buffer.reset();			
+		callback.accept(this);
+		return tryFlowException(supplier);
 	}
 	
 	public ByteBuffer getBuffer() {
@@ -80,67 +92,31 @@ public class SerializerBuffer {
 	}
 	
 	public byte get() {
-		return buffer.get();
-	}
-
-	public byte get(int index) {
-		return buffer.get(index);
-	}
-
-	public ByteBuffer get(byte[] dst, int offset, int length) {
-		return buffer.get(dst, offset, length);
-	}
-
-	public ByteBuffer get(byte[] dst) {
-		return buffer.get(dst);
+		return tryFlowException(() -> buffer.get());
 	}
 
 	public char getChar() {
-		return buffer.getChar();
-	}
-
-	public char getChar(int index) {
-		return buffer.getChar(index);
+		return tryFlowException(() -> buffer.getChar());
 	}
 
 	public short getShort() {
-		return buffer.getShort();
-	}
-
-	public short getShort(int index) {
-		return buffer.getShort(index);
+		return tryFlowException(() -> buffer.getShort());
 	}
 
 	public int getInt() {
-		return buffer.getInt();
-	}
-
-	public int getInt(int index) {
-		return buffer.getInt(index);
+		return tryFlowException(() -> buffer.getInt());
 	}
 
 	public long getLong() {
-		return buffer.getLong();
-	}
-
-	public long getLong(int index) {
-		return buffer.getLong(index);
+		return tryFlowException(() -> buffer.getLong());
 	}
 
 	public float getFloat() {
-		return buffer.getFloat();
-	}
-
-	public float getFloat(int index) {
-		return buffer.getFloat(index);
+		return tryFlowException(() -> buffer.getFloat());
 	}
 
 	public double getDouble() {
-		return buffer.getDouble();
-	}
-
-	public double getDouble(int index) {
-		return buffer.getDouble(index);
+		return tryFlowException(() -> buffer.getDouble());
 	}
 
 	public SerializerBuffer clear() {
@@ -160,94 +136,43 @@ public class SerializerBuffer {
 		return buffer.remaining();
 	}
 
-	public SerializerBuffer put(byte b) {
-		buffer.put(b);
-		return this;
-	}
-
-	public SerializerBuffer put(int index, byte b) {
-		buffer.put(index, b);
-		return this;
-	}
-
-	public SerializerBuffer put(ByteBuffer src) {
-		buffer.put(src);
-		return this;
-	}
-
-	public SerializerBuffer put(byte[] src, int offset, int length) {
-		buffer.put(src, offset, length);
-		return this;
-	}
-
-	public final SerializerBuffer put(byte[] src) {
-		buffer.put(src);
+	public SerializerBuffer put(byte value) {
+		tryFlowException(() -> buffer.put(value));
 		return this;
 	}
 
 	public SerializerBuffer putChar(char value) {
-		buffer.putChar(value);
-		return this;
-	}
-
-	public SerializerBuffer putChar(int index, char value) {
-		buffer.putChar(index, value);
+		tryFlowException(() -> buffer.putChar(value));
 		return this;
 	}
 
 	public SerializerBuffer putShort(short value) {
-		buffer.putShort(value);
-		return this;
-	}
-
-	public SerializerBuffer putShort(int index, short value) {
-		buffer.putShort(index, value);
+		tryFlowException(() -> buffer.putShort(value));
 		return this;
 	}
 
 	public SerializerBuffer putInt(int value) {
-		buffer.putInt(value);
-		return this;
-	}
-
-	public SerializerBuffer putInt(int index, int value) {
-		buffer.putInt(index, value);
+		tryFlowException(() -> buffer.putInt(value));
 		return this;
 	}
 
 	public SerializerBuffer putLong(long value) {
-		buffer.putLong(value);
-		return this;
-	}
-
-	public SerializerBuffer putLong(int index, long value) {
-		buffer.putLong(index, value);
+		tryFlowException(() -> buffer.putLong(value));
 		return this;
 	}
 
 	public SerializerBuffer putFloat(float value) {
-		buffer.putFloat(value);
-		return this;
-	}
-
-	public SerializerBuffer putFloat(int index, float value) {
-		buffer.putFloat(index, value);
+		tryFlowException(() -> buffer.putFloat(value));
 		return this;
 	}
 
 	public SerializerBuffer putDouble(double value) {
-		buffer.putDouble(value);
+		tryFlowException(() -> buffer.putDouble(value));
 		return this;
 	}
-
-	public SerializerBuffer putDouble(int index, double value) {
-		buffer.putDouble(index, value);
-		return this;
-	}
-
-	// TODO
+	
 	public void putString(String s) {
-		handleFlowException(() -> {
+		tryFlowException(() -> {
 			buffer.putInt(s.length());
 			buffer.put(Cheat.CHARSET.encode(s));
 			return Void.TYPE;
@@ -255,7 +180,7 @@ public class SerializerBuffer {
 	}
 	
 	public String getString() {
-		return handleFlowException(() -> {
+		return tryFlowException(() -> {
 			int length = buffer.getInt();
 			int limit = buffer.limit();
 			if(buffer.position()+length > buffer.limit())
@@ -269,6 +194,9 @@ public class SerializerBuffer {
 	
 	@Override
 	public String toString() {
-		return Cheat.CHARSET.decode(buffer).toString();
+		buffer.mark();
+		String res = Cheat.CHARSET.decode(buffer).toString();
+		buffer.reset();
+		return res;
 	}
 }
