@@ -2,11 +2,11 @@ package server;
 
 import java.io.IOException;
 import java.nio.channels.ServerSocketChannel;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 
-import process.ProcessUnit;
 import protocol.Abort;
 import protocol.ClientIdentifier;
 import protocol.Decline;
@@ -25,7 +25,8 @@ public class SimpleServer extends AbstractServer {
 	
 	private final Set<ClientIdentifier> clients;
 	private final Set<ClientIdentifier> activeClients;
-
+	
+	private Explorer explorer;
 	private ServerSocketChannel serverSocket;
 	private ServerProtocolHandler protocolHandler;
 	
@@ -43,10 +44,13 @@ public class SimpleServer extends AbstractServer {
 	public void scan(String hostname) {
 		Cheat.LOGGER.log(Level.INFO, "Preparing request.");
 		
+		explorer = new Explorer(this, Cheat.ONISEP_URL);
+		explorer.sendRequests();
+		/*
 		Request request = new Request("https://en.wiktionary.org/wiki/Captain_Obvious");
 		activeClients	.stream()
 		.forEach(c -> protocolHandler.sendRequest(c, request));
-		/*
+		
 		for(int i = 0; i < 200; i++) {
 			Request request = new Request("https://en.wiktionary.org/wiki/"+i);
 			activeClients	.stream()
@@ -96,6 +100,10 @@ public class SimpleServer extends AbstractServer {
 	public void handleReply(ClientIdentifier clientId, Reply reply) {
 		protocolHandler.handleReply(clientId, reply);
 	}
+	
+	public void processReply(Reply reply) {
+		explorer.processReply(reply);
+	}
 
 	public void handleForget(ClientIdentifier clientId, Forget forget) {
 		protocolHandler.handleForget(clientId, forget);
@@ -116,9 +124,20 @@ public class SimpleServer extends AbstractServer {
 	public void sendRequest(ClientIdentifier clientId, Request request) {
 		protocolHandler.sendRequest(clientId, request);
 	}
+	
+	public boolean sendRequest(Request request) {
+		Optional<ClientIdentifier> optionnalClient = activeClients.stream().findAny();
+		if(!optionnalClient.isPresent()) {
+			Cheat.LOGGER.log(Level.WARNING, "No active client to send request.");
+			return false;
+		}
+		ClientIdentifier clientId = optionnalClient.get();
+		sendRequest(clientId, request);
+		return true;
+	}
 
 	public static void main(String[] args) {
-		Cheat.setLoggerLevelDisplay(Level.ALL);
+		Cheat.setLoggerLevelDisplay(Level.OFF);
 		
 		Server server = new SimpleServer(8080);
 		Thread t1;

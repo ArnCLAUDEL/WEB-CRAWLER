@@ -38,7 +38,7 @@ public class Reply extends Message {
 	@Override
 	public void writeToBuff(SerializerBuffer ms) {
 		ms.putString(hostname);
-		ms.putInt(urls.size());
+		ms.putInt(urls != null ? urls.size() : 0);
 		urls.stream().forEach(ms::putString);
 	}
 

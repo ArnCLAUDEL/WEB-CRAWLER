@@ -9,6 +9,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 
+import javax.xml.crypto.dsig.CanonicalizationMethod;
+
 import client.state.InitClientProtocolHandler;
 import client.state.NotConnectedClientProtocolHandler;
 import io.AbstractIOEntity;

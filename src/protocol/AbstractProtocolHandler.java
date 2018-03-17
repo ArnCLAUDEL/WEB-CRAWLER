@@ -18,7 +18,7 @@ public class AbstractProtocolHandler {
 	
 	protected boolean send(SerializerBuffer serializerBuffer, WritableByteChannel channel) {
 		try {
-			System.out.println(serializerBuffer.write(channel) + " bytes sent");
+			serializerBuffer.write(channel);
 			return true;
 		} catch (IOException e) {
 			Cheat.LOGGER.log(Level.WARNING, "Fail to send message.", e);
@@ -31,9 +31,6 @@ public class AbstractProtocolHandler {
 		return (serializerBuffer) -> {
 			serializerBuffer.flip();
 			send(serializerBuffer, channel);
-			try {
-				Thread.sleep(1_000);
-			} catch (InterruptedException e) {}
 			serializerBuffer.clear();
 		};
 	}

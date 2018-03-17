@@ -8,6 +8,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Cheat {
+	public static final String CAPTAIN_OBVIOUS_URL = "https://en.wiktionary.org/wiki/Captain_Obvious";
+	public static final String ONISEP_URL = "http://www.onisep.fr";
+	public static final String EXAMPLE_URL = "http://www.example.org";
 	public static final long DEFAULT_ID = -1;
 	public final static Random RANDOM = new Random();
 	public final static Charset CHARSET = Charset.forName("UTF-8");

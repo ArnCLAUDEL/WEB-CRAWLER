@@ -70,12 +70,9 @@ public class ServerNetworkHandler extends AbstractNetworkHandler {
 		
 		SocketChannel sc = (SocketChannel) sk.channel();
 		try {
-			System.out.println("Before buffer");
 			synchronized (serializerBuffer) {
-				System.out.println("Entering buffer");
 				serializerBuffer.compact();
 				int read = serializerBuffer.read(sc);
-				System.out.println(read + " bytes read from the socket");
 				if(read < 0) {
 					remove(sc);
 					sk.cancel();
@@ -85,9 +82,7 @@ public class ServerNetworkHandler extends AbstractNetworkHandler {
 				}
 				serializerBuffer.flip();
 				serializerBuffer.notifyAll();
-				System.out.println("Leaving buffer");
 			}
-			System.out.println("After buffer");
 		} catch (IOException e) {
 			Cheat.LOGGER.log(Level.WARNING, "Error while filling buffer.", e);
 		}

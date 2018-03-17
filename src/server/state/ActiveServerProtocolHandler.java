@@ -72,7 +72,7 @@ public class ActiveServerProtocolHandler extends AbstractServerProtocolHandler {
 	@Override
 	public void handleReply(ClientIdentifier clientId, Reply reply) {
 		// TODO
-		reply.getUrls().stream().forEach(System.out::println);
+		server.processReply(reply);
 		Cheat.LOGGER.log(Level.INFO, "Client Reply handled.");
 	}
 	

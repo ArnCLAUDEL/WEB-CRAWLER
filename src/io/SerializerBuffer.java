@@ -14,7 +14,7 @@ import java.util.logging.Level;
 import util.Cheat;
 
 public class SerializerBuffer {
-	private static final int BUFFER_SIZE = 1024;
+	private static final int BUFFER_SIZE = 2048;
 	
 	private final ByteBuffer buffer;
 	
@@ -48,10 +48,10 @@ public class SerializerBuffer {
 		try {
 			return supplier.get();
 		} catch (BufferOverflowException e) {
-			Cheat.LOGGER.log(Level.INFO, "Calling overflow callback.");
+			Cheat.LOGGER.log(Level.FINER, "Calling overflow callback.");
 			return handleFlowException(overflowCallback.orElseThrow(() -> e), supplier);
 		} catch (BufferUnderflowException e) {
-			Cheat.LOGGER.log(Level.INFO, "Calling underflow callback.");
+			Cheat.LOGGER.log(Level.FINER, "Calling underflow callback.");
 			return handleFlowException(underflowCallback.orElseThrow(() -> e), supplier);
 		}
 	}
@@ -186,8 +186,11 @@ public class SerializerBuffer {
 		return tryFlowException(() -> {
 			int length = buffer.getInt();
 			int limit = buffer.limit();
-			if(buffer.position()+length > buffer.limit())
+			if(length > buffer.capacity())
+				return "ERROR";
+			if(buffer.position()+length > buffer.limit()) {
 				throw new BufferUnderflowException();
+			}
 			buffer.limit(buffer.position()+length);
 			String s = Cheat.CHARSET.decode(buffer).toString();
 			buffer.limit(limit);
