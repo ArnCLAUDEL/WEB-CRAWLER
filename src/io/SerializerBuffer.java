@@ -9,6 +9,7 @@ import java.nio.channels.WritableByteChannel;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 
 import util.Cheat;
 
@@ -47,8 +48,10 @@ public class SerializerBuffer {
 		try {
 			return supplier.get();
 		} catch (BufferOverflowException e) {
+			Cheat.LOGGER.log(Level.INFO, "Calling overflow callback.");
 			return handleFlowException(overflowCallback.orElseThrow(() -> e), supplier);
 		} catch (BufferUnderflowException e) {
+			Cheat.LOGGER.log(Level.INFO, "Calling underflow callback.");
 			return handleFlowException(underflowCallback.orElseThrow(() -> e), supplier);
 		}
 	}

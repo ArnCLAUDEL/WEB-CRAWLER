@@ -1,19 +1,20 @@
 package protocol;
 
 import java.nio.channels.SocketChannel;
+import java.nio.channels.WritableByteChannel;
 
 public class ClientIdentifier implements Comparable<ClientIdentifier> {
 	
 	public static final class BUILDER {
 		private String name;
-		private SocketChannel channel;
+		private WritableByteChannel channel;
 		private int nbTaskMax;
 		private int nbProcessUnits;
 		private int nbRequestsSent;
 		private int nbSuccessfulRequests;
 		private int nbDeclinedRequests;
 		
-		public BUILDER(String name, SocketChannel channel) {
+		public BUILDER(String name, WritableByteChannel channel) {
 			if(channel == null)
 				throw new IllegalArgumentException("Excepting a non-null SocketChannel");
 			
@@ -56,14 +57,14 @@ public class ClientIdentifier implements Comparable<ClientIdentifier> {
 	private final long id;
 	private final String name;
 	
-	private SocketChannel channel;
+	private WritableByteChannel channel;
 	private int nbTaskMax = 1;
 	private int nbProcessUnits = 1;
 	private int nbSuccessfulRequests = 0;
 	private int nbDeclinedRequests = 0;
 	private int nbRequestsSent = 0;
 	
-	private ClientIdentifier(String name, SocketChannel channel, int nbTaskMax, int nbProcessUnits,
+	private ClientIdentifier(String name, WritableByteChannel channel, int nbTaskMax, int nbProcessUnits,
 			int nbSuccessfulRequests, int nbRequestsSent, int nbDeclinedRequests) {		
 		this.id = channel.hashCode();
 		this.name = name;
@@ -74,9 +75,9 @@ public class ClientIdentifier implements Comparable<ClientIdentifier> {
 		this.nbDeclinedRequests = nbDeclinedRequests;
 	}
 	
-	public ClientIdentifier(String name, SocketChannel channel) {
+	public ClientIdentifier(String name, WritableByteChannel channel) {
 		if(channel == null)
-			throw new IllegalArgumentException("Excepting a non-null SocketChannel");
+			throw new IllegalArgumentException("Excepting a non-null WritableByteChannel");
 		
 		this.id = channel.hashCode();
 		this.name = name;
@@ -96,7 +97,7 @@ public class ClientIdentifier implements Comparable<ClientIdentifier> {
 		return name;
 	}
 
-	public SocketChannel getChannel() {
+	public WritableByteChannel getChannel() {
 		return channel;
 	}
 

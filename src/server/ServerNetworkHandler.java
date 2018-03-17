@@ -1,11 +1,15 @@
 package server;
 
 import java.io.IOException;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.WritableByteChannel;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 
 import io.AbstractNetworkHandler;
@@ -22,17 +26,26 @@ import util.Cheat;
 
 public class ServerNetworkHandler extends AbstractNetworkHandler {
 
-	private final Map<SocketChannel, ClientIdentifier> clients;
+	private final ExecutorService executor = Executors.newCachedThreadPool();
+	private final Map<WritableByteChannel, ClientIdentifier> clientsId;
+	private final Map<ReadableByteChannel, ServerMessageHandler> clientsMessageHandler;
 	private final Server server;
 	
 	public ServerNetworkHandler(ServerSocketChannel channel, Server server) throws IOException {
 		super(channel, SelectionKey.OP_ACCEPT, server);
 		this.server = server;
-		this.clients = new HashMap<>();
+		this.clientsId = new HashMap<>();
+		this.clientsMessageHandler = new HashMap<>();
+	}
+	
+	public void addClient(WritableByteChannel channel, ClientIdentifier clientId) {
+		this.clientsId.put(channel, clientId);
 	}
 	
 	private void remove(SocketChannel channel) {
-		ClientIdentifier clientId = this.clients.remove(channel);
+		ServerMessageHandler messageHandler = this.clientsMessageHandler.remove(channel);
+		ClientIdentifier clientId = this.clientsId.remove(channel);
+		messageHandler.shutdown();
 		server.removeClient(clientId);
 	}
 	
@@ -41,7 +54,10 @@ public class ServerNetworkHandler extends AbstractNetworkHandler {
 		try {
 			SocketChannel socket = ((ServerSocketChannel) sk.channel()).accept();
 			addChannel(socket, SelectionKey.OP_READ);
-			getSerializerBuffer(socket).setUnderflowCallback(serializerBufferFiller(socket));
+			SerializerBuffer serializerBuffer = getSerializerBuffer(socket);
+			ServerMessageHandler messageHandler = new ServerMessageHandler(server, serializerBuffer, this, socket);
+			executor.execute(messageHandler);
+			clientsMessageHandler.put(socket, messageHandler);
 			Cheat.LOGGER.log(Level.INFO,"Connection from " + socket.getRemoteAddress() + " accepted");
 		} catch (IOException e) {
 			Cheat.LOGGER.log(Level.WARNING, e.getMessage(), e);
@@ -52,74 +68,29 @@ public class ServerNetworkHandler extends AbstractNetworkHandler {
 	public void handleReadOperation(SelectionKey sk, SerializerBuffer serializerBuffer) {
 		Cheat.LOGGER.log(Level.FINER, "Message received.");
 		
-		serializerBuffer.clear();
 		SocketChannel sc = (SocketChannel) sk.channel();
 		try {
-			if(serializerBuffer.read(sc) < 0) {
-				remove(sc);
-				sk.cancel();
-				sc.close();
-				Cheat.LOGGER.log(Level.INFO, "Client disconnected.");
-				return;
+			System.out.println("Before buffer");
+			synchronized (serializerBuffer) {
+				System.out.println("Entering buffer");
+				serializerBuffer.compact();
+				int read = serializerBuffer.read(sc);
+				System.out.println(read + " bytes read from the socket");
+				if(read < 0) {
+					remove(sc);
+					sk.cancel();
+					sc.close();
+					Cheat.LOGGER.log(Level.INFO, "Client disconnected.");
+					return;
+				}
+				serializerBuffer.flip();
+				serializerBuffer.notifyAll();
+				System.out.println("Leaving buffer");
 			}
-			serializerBuffer.flip();
-			handleProtocol(sc, serializerBuffer);
-		} catch(IOException e) {
-			Cheat.LOGGER.log(Level.WARNING, e.getMessage(), e);
+			System.out.println("After buffer");
+		} catch (IOException e) {
+			Cheat.LOGGER.log(Level.WARNING, "Error while filling buffer.", e);
 		}
-	}
-	
-	
-	protected void handleProtocol(SocketChannel channel, SerializerBuffer serializerBuffer) {
-		// TODO
-		byte flag = serializerBuffer.get();
-		if(flag == Flag.INIT) {
-			handleInit(channel, serializerBuffer);
-			return;
-		}
-		ClientIdentifier clientId = clients.get(channel);		
-		
-		switch(flag) {
-			case Flag.FORGET: handleForget(clientId, serializerBuffer); break;
-			case Flag.START_SERVICE: handleStartService(clientId, serializerBuffer); break;
-			case Flag.STOP_SERVICE: handleStopService(clientId, serializerBuffer); break;
-			case Flag.REPLY : handleReply(clientId, serializerBuffer);  break;
-			case Flag.DECLINE : handleDecline(clientId, serializerBuffer);  break;
-			default : Cheat.LOGGER.log(Level.WARNING, "Unknown protocol flag : " + flag);
-		}		
-	}
-	
-	private void handleInit(SocketChannel channel, SerializerBuffer serializerBuffer) {
-		Init init = Init.CREATOR.init();
-		init.readFromBuff(serializerBuffer);
-		
-		ClientIdentifier clientId = new ClientIdentifier.BUILDER(init.getName(), channel)
-														.nbTaskMax(init.getNbTaskMax())
-														.nbProcessUnits(init.getNbProcessUnits())
-														.build();
-		
-		if(server.handleInit(clientId, init))
-			this.clients.put(channel, clientId);
-	}
-	
-	private void handleForget(ClientIdentifier clientId, SerializerBuffer serializerBuffer) {
-		handleMessage(serializerBuffer, clientId, Forget.CREATOR, server::handleForget);
-	}
-	
-	private void handleReply(ClientIdentifier clientId, SerializerBuffer serializerBuffer ) {
-		handleMessage(serializerBuffer, clientId, Reply.CREATOR, server::handleReply);
-	}
-	
-	private void handleStartService(ClientIdentifier clientId, SerializerBuffer serializerBuffer ) {
-		handleMessage(serializerBuffer, clientId, StartService.CREATOR, server::handleStartService);
-	}
-	
-	private void handleStopService(ClientIdentifier clientId, SerializerBuffer serializerBuffer ) {
-		handleMessage(serializerBuffer, clientId, StopService.CREATOR, server::handleStopService);
-	}
-	
-	private void handleDecline(ClientIdentifier clientId, SerializerBuffer serializerBuffer ) {
-		handleMessage(serializerBuffer, clientId, Decline.CREATOR, server::handleDecline);
 	}
 
 }

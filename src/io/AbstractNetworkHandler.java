@@ -16,7 +16,7 @@ import java.util.logging.Level;
 import protocol.Message;
 import util.Cheat;
 
-public abstract class AbstractNetworkHandler extends AbstractHandler implements NetworkHandler {
+public abstract class AbstractNetworkHandler extends AbstractHandler {
 	private final Map<SelectableChannel, Integer> channelOps = new HashMap<>();
 	private final Map<SelectableChannel, SerializerBuffer> channelBuffers = new HashMap<>();
 	private final Selector selector;
@@ -98,42 +98,24 @@ public abstract class AbstractNetworkHandler extends AbstractHandler implements 
 		}
 	}
 	
-	@Override
+	
 	public void handleAcceptOperation(SelectionKey sk) {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
+	
 	public void handleReadOperation(SelectionKey sk, SerializerBuffer serializerBuffer) {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
+	
 	public void handleWriteOperation(SelectionKey sk, SerializerBuffer serializerBuffer) {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
+	
 	public void handleConnectOperation(SelectionKey sk) {
 		throw new UnsupportedOperationException();
-	}
-	
-	protected abstract void handleProtocol(SocketChannel channel, SerializerBuffer serializerBuffer);
-	
-	protected <M extends Message> void handleMessage(SerializerBuffer serializerBuffer, Creator<M> messageCreator, Consumer<M> handler) {
-		// TODO
-		M message = messageCreator.init();
-		message.readFromBuff(serializerBuffer);
-		handler.accept(message);
-		serializerBuffer.clear();
-	}
-	
-	protected <M extends Message,T> void handleMessage(SerializerBuffer serializerBuffer, T info, Creator<M> messageCreator, BiConsumer<T,M> handler) {
-		// TODO 
-		M message = messageCreator.init();
-		message.readFromBuff(serializerBuffer);
-		handler.accept(info, message);
-		serializerBuffer.clear();
 	}
 	
 	@Override

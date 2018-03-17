@@ -3,12 +3,15 @@ package client;
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 import io.AbstractNetworkHandler;
+import io.Creator;
 import io.SerializerBuffer;
 import protocol.Abort;
 import protocol.Flag;
+import protocol.Message;
 import protocol.Ok;
 import protocol.Request;
 import util.Cheat;
@@ -40,7 +43,6 @@ public class ClientNetworkHandler extends AbstractNetworkHandler {
 		}
 	}
 
-	@Override
 	protected void handleProtocol(SocketChannel channel, SerializerBuffer serializerBuffer) {
 		// TODO Auto-generated method stub
 		byte flag = serializerBuffer.get();
@@ -50,6 +52,14 @@ public class ClientNetworkHandler extends AbstractNetworkHandler {
 			case Flag.ABORT: handleAbort(channel, serializerBuffer); break;
 			default : Cheat.LOGGER.log(Level.WARNING, "Unknown protocol flag : " + flag);
 		}
+	}
+	
+	private <M extends Message> void handleMessage(SerializerBuffer serializerBuffer, Creator<M> messageCreator, Consumer<M> handler) {
+		// TODO
+		M message = messageCreator.init();
+		message.readFromBuff(serializerBuffer);
+		handler.accept(message);
+		serializerBuffer.clear();
 	}
 	
 	private void handleOk(SocketChannel channel, SerializerBuffer serializerBuffer) {
