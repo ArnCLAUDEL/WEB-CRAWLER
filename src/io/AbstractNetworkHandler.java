@@ -1,7 +1,6 @@
 package io;
 
 import java.io.IOException;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -9,11 +8,8 @@ import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 
-import protocol.Message;
 import util.Cheat;
 
 public abstract class AbstractNetworkHandler extends AbstractHandler {
@@ -41,19 +37,6 @@ public abstract class AbstractNetworkHandler extends AbstractHandler {
 	
 	protected SerializerBuffer getSerializerBuffer(SelectableChannel channel) {
 		return channelBuffers.get(channel);
-	}
-	
-	protected Consumer<? super SerializerBuffer> serializerBufferFiller(ReadableByteChannel channel) {
-		return (serializerBuffer) -> {
-			try {
-				serializerBuffer.compact();
-				serializerBuffer.read(channel);
-				serializerBuffer.flip();
-			} catch (IOException e) {
-				Cheat.LOGGER.log(Level.WARNING, "Error while re-filling buffer.", e);
-			}
-			
-		};
 	}
 	
 	@Override
@@ -84,12 +67,6 @@ public abstract class AbstractNetworkHandler extends AbstractHandler {
 				
 				else if(checkOps(sk, SelectionKey.OP_READ))
 					handleReadOperation(sk, channelBuffers.get(sk.channel()));
-
-				else if(checkOps(sk, SelectionKey.OP_WRITE))
-					handleWriteOperation(sk, channelBuffers.get(sk.channel()));
-				
-				else if(checkOps(sk, SelectionKey.OP_CONNECT))
-					handleConnectOperation(sk);
 				
 				itr.remove();
 			}
@@ -98,26 +75,33 @@ public abstract class AbstractNetworkHandler extends AbstractHandler {
 		}
 	}
 	
+	protected void channelClosedCallback(SelectionKey sk) throws IOException {
+		sk.cancel();
+		sk.channel().close();
+	}
 	
-	public void handleAcceptOperation(SelectionKey sk) {
-		throw new UnsupportedOperationException();
+	protected void handleAcceptOperation(SelectionKey sk) {
+		Cheat.LOGGER.log(Level.FINER, "Handling ACCEPT_OPERATION..");
 	}
 
-	
-	public void handleReadOperation(SelectionKey sk, SerializerBuffer serializerBuffer) {
-		throw new UnsupportedOperationException();
+	protected void handleReadOperation(SelectionKey sk, SerializerBuffer serializerBuffer) {
+		Cheat.LOGGER.log(Level.FINER, "Handling READ_OPERATION..");
+		SocketChannel sc = (SocketChannel) sk.channel();
+		try {
+			synchronized (serializerBuffer) {
+				serializerBuffer.compact();
+				int read = serializerBuffer.read(sc);
+				if(read < 0) {
+					channelClosedCallback(sk);
+				}
+				serializerBuffer.flip();
+				serializerBuffer.notifyAll();
+			}
+		} catch (IOException e) {
+			Cheat.LOGGER.log(Level.WARNING, "Error while handling READ_OPERATION.", e);
+		}
 	}
 
-	
-	public void handleWriteOperation(SelectionKey sk, SerializerBuffer serializerBuffer) {
-		throw new UnsupportedOperationException();
-	}
-
-	
-	public void handleConnectOperation(SelectionKey sk) {
-		throw new UnsupportedOperationException();
-	}
-	
 	@Override
 	public String toString() {
 		return "Network Handler " + Thread.currentThread().getId();

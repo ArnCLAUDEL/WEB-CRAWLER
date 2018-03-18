@@ -15,13 +15,6 @@ import java.util.logging.Level;
 import io.AbstractNetworkHandler;
 import io.SerializerBuffer;
 import protocol.ClientIdentifier;
-import protocol.Decline;
-import protocol.Flag;
-import protocol.Forget;
-import protocol.Init;
-import protocol.Reply;
-import protocol.StartService;
-import protocol.StopService;
 import util.Cheat;
 
 public class ServerNetworkHandler extends AbstractNetworkHandler {
@@ -50,7 +43,8 @@ public class ServerNetworkHandler extends AbstractNetworkHandler {
 	}
 	
 	@Override
-	public void handleAcceptOperation(SelectionKey sk) {
+	protected void handleAcceptOperation(SelectionKey sk) {
+		Cheat.LOGGER.log(Level.FINER, "Handling ACCEPT_OPERATION..");
 		try {
 			SocketChannel socket = ((ServerSocketChannel) sk.channel()).accept();
 			addChannel(socket, SelectionKey.OP_READ);
@@ -60,32 +54,14 @@ public class ServerNetworkHandler extends AbstractNetworkHandler {
 			clientsMessageHandler.put(socket, messageHandler);
 			Cheat.LOGGER.log(Level.INFO,"Connection from " + socket.getRemoteAddress() + " accepted");
 		} catch (IOException e) {
-			Cheat.LOGGER.log(Level.WARNING, e.getMessage(), e);
+			Cheat.LOGGER.log(Level.WARNING, "Error while handling ACCEPT_OPERATION.", e);
 		}
 	}
 	
 	@Override
-	public void handleReadOperation(SelectionKey sk, SerializerBuffer serializerBuffer) {
-		Cheat.LOGGER.log(Level.FINER, "Message received.");
-		
-		SocketChannel sc = (SocketChannel) sk.channel();
-		try {
-			synchronized (serializerBuffer) {
-				serializerBuffer.compact();
-				int read = serializerBuffer.read(sc);
-				if(read < 0) {
-					remove(sc);
-					sk.cancel();
-					sc.close();
-					Cheat.LOGGER.log(Level.INFO, "Client disconnected.");
-					return;
-				}
-				serializerBuffer.flip();
-				serializerBuffer.notifyAll();
-			}
-		} catch (IOException e) {
-			Cheat.LOGGER.log(Level.WARNING, "Error while filling buffer.", e);
-		}
+	protected void channelClosedCallback(SelectionKey sk) throws IOException {
+		super.channelClosedCallback(sk);
+		remove((SocketChannel) sk.channel());
+		Cheat.LOGGER.log(Level.INFO, "Client disconnected.");
 	}
-
 }

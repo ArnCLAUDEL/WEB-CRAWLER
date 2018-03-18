@@ -3,11 +3,11 @@ package server;
 import java.nio.channels.WritableByteChannel;
 import java.util.Optional;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 
 import io.Creator;
 import io.SerializerBuffer;
+import protocol.AbstractMessageHandler;
 import protocol.ClientIdentifier;
 import protocol.Decline;
 import protocol.Flag;
@@ -19,46 +19,24 @@ import protocol.StartService;
 import protocol.StopService;
 import util.Cheat;
 
-public class ServerMessageHandler implements Runnable {
+public class ServerMessageHandler extends AbstractMessageHandler {
 
-	private final SerializerBuffer serializerBuffer;
 	private final Server server;
 	private final ServerNetworkHandler networkHandler;
-	private final WritableByteChannel channel;
 	
 	private Optional<ClientIdentifier> optionalClientId;
-	private boolean stop;
 	
 	public ServerMessageHandler(Server server, SerializerBuffer serializerBuffer, ServerNetworkHandler networkHandler, WritableByteChannel channel) {
-		this.serializerBuffer = serializerBuffer;
-		this.serializerBuffer.setUnderflowCallback(underflowCallback());
+		super(serializerBuffer, channel);
 		this.server = server;
 		this.networkHandler = networkHandler;
-		this.channel = channel;
 		this.optionalClientId = Optional.empty();
-		this.stop = false;
-	}
-	
-	public void shutdown() {
-		stop = true;
-		synchronized (serializerBuffer) {
-			serializerBuffer.notifyAll();
-		}
-	}
-	
-	@Override
-	public void run() {
-		serializerBuffer.clear();
-		serializerBuffer.flip();
-		System.out.println(serializerBuffer.remaining() + " bytes remaining");
-		while(!stop) {
-			handleProtocol();
-		}
 	}
 	
 	protected void handleProtocol() {
 		synchronized (serializerBuffer) {
 			byte flag = serializerBuffer.get();
+			System.out.println(Byte.toUnsignedInt(flag));
 			if(flag == Flag.INIT) {
 				handleInit();
 				return;
@@ -82,22 +60,10 @@ public class ServerMessageHandler implements Runnable {
 		}
 	}
 	
-	private Consumer<? super SerializerBuffer> underflowCallback() {
-		return (serializerBuffer) -> {
-			try {
-				synchronized (serializerBuffer) {
-					Cheat.LOGGER.log(Level.INFO, "Waiting for re-filling");
-					serializerBuffer.wait();
-				}
-			} catch (InterruptedException e) {
-				Cheat.LOGGER.log(Level.WARNING, e.getMessage(), e);
-			}
-		};
-	}
-	
 	private <M extends Message,T> void handleMessage(SerializerBuffer serializerBuffer, T info, Creator<M> messageCreator, BiConsumer<T,M> handler) {
 		M message = messageCreator.init();
 		message.readFromBuff(serializerBuffer);
+		Cheat.LOGGER.log(Level.FINER, message + " received.");
 		handler.accept(info, message);
 	}
 	
@@ -126,7 +92,6 @@ public class ServerMessageHandler implements Runnable {
 	
 	private void handleStartService(ClientIdentifier clientId) {
 		handleMessage(serializerBuffer, clientId, StartService.CREATOR, server::handleStartService);
-		
 	}
 	
 	private void handleStopService(ClientIdentifier clientId) {

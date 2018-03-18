@@ -20,7 +20,6 @@ public class ActiveClientProtocolHandler extends AbstractClientProtocolHandler {
 	
 	@Override
 	public void sendReply(Reply reply) {
-		// TODO
 		send(reply);
 	}
 	
@@ -31,21 +30,19 @@ public class ActiveClientProtocolHandler extends AbstractClientProtocolHandler {
 	
 	@Override
 	public void sendStopService(StopService stopService) {
-		if(send(stopService))
-			client.setProtocolHandler(new InactiveClientProtocolHandler(client, channel));
+		send(stopService);
+		client.setProtocolHandler(new InactiveClientProtocolHandler(client, channel));
 	}
 	
 	@Override
 	public void sendForget(Forget forget) {
-		if(send(forget))
-			client.setProtocolHandler(new InitClientProtocolHandler(client, channel));
+		send(forget);
+		client.setProtocolHandler(new InitClientProtocolHandler(client, channel));
 	}
 	
 	@Override
 	public void handleRequest(Request request) {
-		// TODO 
-		client.scan(request.getHostname());
-		Cheat.LOGGER.log(Level.INFO, "Server Request handled.");		
+		client.scan(request.getHostname());	
 	}
 	
 	@Override
@@ -56,7 +53,7 @@ public class ActiveClientProtocolHandler extends AbstractClientProtocolHandler {
 	
 	@Override
 	public String toString() {
-		return "Active";
+		return "ACTIVE";
 	}
 	
 }

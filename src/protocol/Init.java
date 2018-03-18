@@ -56,4 +56,9 @@ public class Init extends Message {
 		this.nbTaskMax = ms.getInt();
 		this.nbProcessUnits = ms.getInt();
 	}
+	
+	@Override
+	public String toString() {
+		return "Init";
+	}
 }

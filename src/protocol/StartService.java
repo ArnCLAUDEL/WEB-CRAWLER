@@ -19,5 +19,9 @@ public class StartService extends Message {
 	public void readFromBuff(SerializerBuffer ms) {
 		
 	}
-
+	
+	@Override
+	public String toString() {
+		return "Start Service";
+	}
 }

@@ -28,4 +28,8 @@ public class Abort extends Message {
 		request.readFromBuff(ms);
 	}
 
+	@Override
+	public String toString() {
+		return "Abort";
+	}
 }

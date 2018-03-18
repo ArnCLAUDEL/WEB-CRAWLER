@@ -12,10 +12,10 @@ import protocol.Message;
 import protocol.Ok;
 import protocol.Reply;
 import protocol.Request;
+import protocol.ServerProtocolHandler;
 import protocol.StartService;
 import protocol.StopService;
 import server.Server;
-import server.ServerProtocolHandler;
 import util.Cheat;
 
 public abstract class AbstractServerProtocolHandler extends AbstractProtocolHandler implements ServerProtocolHandler {

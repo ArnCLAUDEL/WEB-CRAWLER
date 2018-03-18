@@ -2,11 +2,9 @@ package protocol;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Level;
 
 import io.Creator;
 import io.SerializerBuffer;
-import util.Cheat;
 
 public class Reply extends Message {
 	public static final Creator<Reply> CREATOR = Reply::new;
@@ -51,5 +49,9 @@ public class Reply extends Message {
 			urls.add(ms.getString());
 		}
 	}
-
+	
+	@Override
+	public String toString() {
+		return "Reply";
+	}
 }

@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import protocol.Reply;
 import protocol.Request;
-import server.Explorer.STATE;
 import util.Cheat;
 
 public class Explorer {

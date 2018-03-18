@@ -28,4 +28,8 @@ public class Decline extends Message {
 		this.request.readFromBuff(ms);
 	}
 
+	@Override
+	public String toString() {
+		return "Decline";
+	}
 }

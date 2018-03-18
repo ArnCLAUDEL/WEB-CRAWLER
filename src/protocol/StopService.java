@@ -19,5 +19,10 @@ public class StopService extends Message {
 	public void readFromBuff(SerializerBuffer ms) {
 		
 	}
+	
+	@Override
+	public String toString() {
+		return "Stop Service";
+	}
 
 }

@@ -8,4 +8,8 @@ public class InactiveServerProtocolHandler extends AbstractServerProtocolHandler
 		super(server);
 	}
 	
+	@Override
+	public String toString() {
+		return "INACTIVE";
+	}
 }

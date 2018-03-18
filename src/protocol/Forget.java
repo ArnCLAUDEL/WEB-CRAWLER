@@ -20,4 +20,8 @@ public class Forget extends Message {
 		
 	}
 
+	@Override
+	public String toString() {
+		return "Forget";
+	}
 }

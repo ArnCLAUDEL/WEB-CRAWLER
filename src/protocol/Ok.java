@@ -31,4 +31,8 @@ public class Ok extends Message {
 		
 	}
 
+	@Override
+	public String toString() {
+		return "Ok";
+	}
 }

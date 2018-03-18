@@ -25,55 +25,44 @@ public class ActiveServerProtocolHandler extends AbstractServerProtocolHandler {
 	public boolean handleInit(ClientIdentifier clientId, Init init) {
 		boolean res = server.addClient(clientId);
 		if(res)
-			Cheat.LOGGER.log(Level.FINER, "Client identified.");
-		else
-			Cheat.LOGGER.log(Level.FINEST, "New client identifier ignored.");
-		sendOk(clientId, new Ok(clientId.getId()));
+			sendOk(clientId, new Ok(clientId.getId()));
 		return res;
 	}
 	
 	@Override
 	public void sendOk(ClientIdentifier clientId, Ok ok) {
-		// TODO
 		send(clientId, ok);
 	}
 	
 	@Override
 	public void sendAbort(ClientIdentifier clientId, Abort abort) {
-		// TODO
 		send(clientId, abort);
 	}
 	
 	@Override
-	public void sendRequest(ClientIdentifier clientId, Request request) {
-		// TODO 
+	public void sendRequest(ClientIdentifier clientId, Request request) { 
 		send(clientId, request);
 	}
 
 	@Override
 	public void handleForget(ClientIdentifier clientId, Forget forget) {
 		server.removeClient(clientId);
-		Cheat.LOGGER.log(Level.FINER, "Client removed.");
 	}
 
 	@Override
 	public void handleStartService(ClientIdentifier clientId, StartService startService) {
 		server.setClientActivity(clientId, true);
 		sendOk(clientId, new Ok(clientId.getId()));
-		Cheat.LOGGER.log(Level.FINER, "Client activity started.");
 	}
 	
 	@Override
 	public void handleStopService(ClientIdentifier clientId, StopService stopService) {
 		server.setClientActivity(clientId, false);
-		Cheat.LOGGER.log(Level.FINER, "Client activity stopped.");
 	}
 
 	@Override
 	public void handleReply(ClientIdentifier clientId, Reply reply) {
-		// TODO
 		server.processReply(reply);
-		Cheat.LOGGER.log(Level.INFO, "Client Reply handled.");
 	}
 	
 	@Override
@@ -82,4 +71,8 @@ public class ActiveServerProtocolHandler extends AbstractServerProtocolHandler {
 		Cheat.LOGGER.log(Level.INFO, "Client Decline handled. (Not yet implemented)");
 	}
 
+	@Override
+	public String toString() {
+		return "ACTIVE";
+	}
 }

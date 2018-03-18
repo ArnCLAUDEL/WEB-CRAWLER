@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.channels.ServerSocketChannel;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.TreeSet;
 import java.util.logging.Level;
 
@@ -15,6 +17,7 @@ import protocol.Init;
 import protocol.Ok;
 import protocol.Reply;
 import protocol.Request;
+import protocol.ServerProtocolHandler;
 import protocol.StartService;
 import protocol.StopService;
 import server.state.ActiveServerProtocolHandler;
@@ -36,6 +39,15 @@ public class SimpleServer extends AbstractServer {
 		super(port);
 		this.clients = new TreeSet<>();
 		this.activeClients = new TreeSet<>();
+		new Timer().scheduleAtFixedRate(new TimerTask() {
+			
+			@Override
+			public void run() {
+				System.out.println(activeClients.size() + " clients registered");
+				System.out.println(activeClients.size() + " clients active");
+				
+			}
+		}, 0, 5_000);
 		this.protocolHandler = new InactiveServerProtocolHandler(this);
 		this.active = false;
 	}
@@ -86,46 +98,62 @@ public class SimpleServer extends AbstractServer {
 	}	
 	
 	public boolean handleInit(ClientIdentifier clientId, Init init) {
-		return protocolHandler.handleInit(clientId, init);
+		Cheat.LOGGER.log(Level.FINER, "Handling " + init + "..");
+		boolean res = protocolHandler.handleInit(clientId, init);
+		if(res)
+			Cheat.LOGGER.log(Level.INFO, clientId + " registered.");
+		else
+			Cheat.LOGGER.log(Level.FINE, clientId + " init ignored.");
+		return res;
 	}
 
 	public void handleStartService(ClientIdentifier clientId, StartService startService) {
+		Cheat.LOGGER.log(Level.FINER, "Handling " + startService + "..");
 		protocolHandler.handleStartService(clientId, startService);
 	}
 
 	public void handleStopService(ClientIdentifier clientId, StopService stopService) {
+		Cheat.LOGGER.log(Level.FINER, "Handling " + stopService + "..");
 		protocolHandler.handleStopService(clientId, stopService);
 	}
 
 	public void handleReply(ClientIdentifier clientId, Reply reply) {
+		Cheat.LOGGER.log(Level.FINER, "Handling " + reply + "..");
 		protocolHandler.handleReply(clientId, reply);
 	}
 	
 	public void processReply(Reply reply) {
+		Cheat.LOGGER.log(Level.FINER, "Processing " + reply + "..");
 		explorer.processReply(reply);
 	}
 
 	public void handleForget(ClientIdentifier clientId, Forget forget) {
+		Cheat.LOGGER.log(Level.FINER, "Handling " + forget + "..");
 		protocolHandler.handleForget(clientId, forget);
 	}
 
 	public void handleDecline(ClientIdentifier clientId, Decline decline) {
+		Cheat.LOGGER.log(Level.FINER, "Handling " + decline + "..");
 		protocolHandler.handleDecline(clientId, decline);
 	}
 
 	public void sendOk(ClientIdentifier clientId, Ok ok) {
+		Cheat.LOGGER.log(Level.FINER, "Sending " + ok + "..");
 		protocolHandler.sendOk(clientId, ok);
 	}
 
 	public void sendAbort(ClientIdentifier clientId, Abort abort) {
+		Cheat.LOGGER.log(Level.FINER, "Sending " + abort + "..");
 		protocolHandler.sendAbort(clientId, abort);
 	}
 
 	public void sendRequest(ClientIdentifier clientId, Request request) {
+		Cheat.LOGGER.log(Level.FINER, "Sending " + request + "..");
 		protocolHandler.sendRequest(clientId, request);
 	}
 	
 	public boolean sendRequest(Request request) {
+		Cheat.LOGGER.log(Level.FINER, "Sending " + request + "..");
 		Optional<ClientIdentifier> optionnalClient = activeClients.stream().findAny();
 		if(!optionnalClient.isPresent()) {
 			Cheat.LOGGER.log(Level.WARNING, "No active client to send request.");
@@ -137,7 +165,7 @@ public class SimpleServer extends AbstractServer {
 	}
 
 	public static void main(String[] args) {
-		Cheat.setLoggerLevelDisplay(Level.OFF);
+		Cheat.setLoggerLevelDisplay(Level.ALL);
 		
 		Server server = new SimpleServer(8080);
 		Thread t1;
@@ -152,21 +180,25 @@ public class SimpleServer extends AbstractServer {
 
 	@Override
 	public boolean addClient(ClientIdentifier clientId) {
-		return clients.add(clientId);
+		return clients.add(clientId) | clients.contains(clientId);
 	}
 
 	@Override
 	public void removeClient(ClientIdentifier clientId) {
-		activeClients.remove(clientId);
-		clients.remove(clientId);
+		boolean res = clients.remove(clientId) | activeClients.remove(clientId);
+		if(res)
+			Cheat.LOGGER.log(Level.INFO, clientId + " removed.");
 	}
 
 	@Override
 	public void setClientActivity(ClientIdentifier clientId, boolean active) {
-		if(active)
+		if(active) {
 			activeClients.add(clientId);
-		else
+			Cheat.LOGGER.log(Level.INFO, clientId + " is now active.");
+		} else {
 			activeClients.remove(clientId);
+			Cheat.LOGGER.log(Level.INFO, clientId + " is now inactive.");
+		}
 	}
 	
 }

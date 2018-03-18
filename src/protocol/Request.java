@@ -31,4 +31,8 @@ public class Request extends Message {
 		this.hostname = ms.getString();
 	}
 
+	@Override
+	public String toString() {
+		return "Request";
+	}
 }

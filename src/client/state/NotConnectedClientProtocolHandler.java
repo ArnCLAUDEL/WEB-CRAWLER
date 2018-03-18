@@ -10,7 +10,7 @@ public class NotConnectedClientProtocolHandler extends AbstractClientProtocolHan
 
 	@Override
 	public String toString() {
-		return "Not Connected";
+		return "NOT_CONNECTED";
 	}
 	
 }

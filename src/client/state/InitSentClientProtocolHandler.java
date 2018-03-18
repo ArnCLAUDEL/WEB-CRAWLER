@@ -1,21 +1,33 @@
 package client.state;
 
 import java.nio.channels.SocketChannel;
+import java.util.TimerTask;
 
 import client.Client;
 import protocol.Decline;
+import protocol.Init;
 import protocol.Ok;
 import protocol.Request;
 import protocol.StartService;
 
-public class InitSentClientProtocolHandler extends InitClientProtocolHandler {
+public class InitSentClientProtocolHandler extends AbstractClientProtocolHandler {
 
-	public InitSentClientProtocolHandler(Client client, SocketChannel channel) {
+	private final TimerTask retry;
+	
+	public InitSentClientProtocolHandler(Client client, SocketChannel channel, Init init) {
 		super(client, channel);
+		retry = retry(init, this::sendInit);
+		schedule(retry, DEFAULT_FIRST_TIME_RETRY, DEFAULT_PERIOD_RETRY);
 	}
 
 	@Override
+	public void sendInit(Init init) {
+		send(init);
+	}
+	
+	@Override
 	public void handleOk(Ok ok) {
+		retry.cancel();
 		client.setId(ok.getId());
 		client.setProtocolHandler(new InactiveClientProtocolHandler(client, channel));
 		client.sendStartService(new StartService());
@@ -33,7 +45,7 @@ public class InitSentClientProtocolHandler extends InitClientProtocolHandler {
 	
 	@Override
 	public String toString() {
-		return "Init Sent";
+		return "INIT_SENT";
 	}
 	
 }

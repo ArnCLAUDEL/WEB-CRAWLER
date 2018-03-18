@@ -16,14 +16,14 @@ public class InactiveClientProtocolHandler extends AbstractClientProtocolHandler
 	
 	@Override
 	public void sendStartService(StartService startService) {
-		if(send(startService))
-			client.setProtocolHandler(new InactiveStartSentClientProtocolHandler(client, channel));
+		send(startService);
+		client.setProtocolHandler(new InactiveStartSentClientProtocolHandler(client, channel, startService));
 	}
 	
 	@Override
 	public void sendForget(Forget forget) {
-		if(send(forget))
-			client.setProtocolHandler(new InitClientProtocolHandler(client, channel));
+		send(forget);
+		client.setProtocolHandler(new InitClientProtocolHandler(client, channel));
 	}
 	
 	@Override
@@ -38,7 +38,7 @@ public class InactiveClientProtocolHandler extends AbstractClientProtocolHandler
 	
 	@Override
 	public String toString() {
-		return "Inactive";
+		return "INACTIVE";
 	}
 	
 }

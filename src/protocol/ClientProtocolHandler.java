@@ -1,14 +1,4 @@
-package client;
-
-import protocol.Abort;
-import protocol.Decline;
-import protocol.Forget;
-import protocol.Init;
-import protocol.Ok;
-import protocol.Reply;
-import protocol.Request;
-import protocol.StartService;
-import protocol.StopService;
+package protocol;
 
 public interface ClientProtocolHandler {
 	void sendInit(Init init);

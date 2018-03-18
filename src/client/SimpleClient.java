@@ -9,13 +9,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 
-import javax.xml.crypto.dsig.CanonicalizationMethod;
-
 import client.state.InitClientProtocolHandler;
 import client.state.NotConnectedClientProtocolHandler;
 import io.AbstractIOEntity;
 import process.ProcessExecutor;
 import protocol.Abort;
+import protocol.ClientProtocolHandler;
 import protocol.Decline;
 import protocol.Forget;
 import protocol.Init;
@@ -113,38 +112,47 @@ public class SimpleClient extends AbstractIOEntity implements Client {
 	}
 
 	public void sendInit(Init init) {
+		Cheat.LOGGER.log(Level.FINER, "Sending " + init + "..");
 		protocolHandler.sendInit(init);
 	}
 
 	public void sendStartService(StartService startService) {
+		Cheat.LOGGER.log(Level.FINER, "Sending " + startService + "..");
 		protocolHandler.sendStartService(startService);
 	}
 
 	public void sendStopService(StopService stopService) {
+		Cheat.LOGGER.log(Level.FINER, "Sending " + stopService + "..");
 		protocolHandler.sendStopService(stopService);
 	}
 
 	public void sendReply(Reply reply) {
+		Cheat.LOGGER.log(Level.FINER, "Sending " + reply + "..");
 		protocolHandler.sendReply(reply);
 	}
 
 	public void sendDecline(Decline decline) {
+		Cheat.LOGGER.log(Level.FINER, "Sending " + decline + "..");
 		protocolHandler.sendDecline(decline);
 	}
 
 	public void sendForget(Forget forget) {
+		Cheat.LOGGER.log(Level.FINER, "Sending " + forget + "..");
 		protocolHandler.sendForget(forget);
 	}
 
 	public void handleRequest(Request request) {
+		Cheat.LOGGER.log(Level.FINER, "Handling " + request + "..");
 		protocolHandler.handleRequest(request);
 	}
 
 	public void handleOk(Ok ok) {
+		Cheat.LOGGER.log(Level.FINER, "Handling " + ok + "..");
 		protocolHandler.handleOk(ok);
 	}
 
 	public void handleAbort(Abort abort) {
+		Cheat.LOGGER.log(Level.FINER, "Handling " + abort + "..");
 		protocolHandler.handleAbort(abort);
 	}
 

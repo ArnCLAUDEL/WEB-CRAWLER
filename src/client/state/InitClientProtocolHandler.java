@@ -15,8 +15,8 @@ public class InitClientProtocolHandler extends AbstractClientProtocolHandler {
 
 	@Override
 	public void sendInit(Init init) {
-		if(send(init))
-			client.setProtocolHandler(new InitSentClientProtocolHandler(client, channel));
+		send(init);
+		client.setProtocolHandler(new InitSentClientProtocolHandler(client, channel, init));
 	}
 	
 	@Override
@@ -31,7 +31,7 @@ public class InitClientProtocolHandler extends AbstractClientProtocolHandler {
 	
 	@Override
 	public String toString() {
-		return "Init";
+		return "INIT";
 	}
 	
 }
