@@ -36,7 +36,6 @@ public class ServerMessageHandler extends AbstractMessageHandler {
 	protected void handleProtocol() {
 		synchronized (serializerBuffer) {
 			byte flag = serializerBuffer.get();
-			System.out.println(Byte.toUnsignedInt(flag));
 			if(flag == Flag.INIT) {
 				handleInit();
 				return;

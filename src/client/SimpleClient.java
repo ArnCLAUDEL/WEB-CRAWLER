@@ -163,7 +163,7 @@ public class SimpleClient extends AbstractIOEntity implements Client {
 	}
 
 	public static void main(String[] args) throws IOException {
-		Cheat.setLoggerLevelDisplay(Level.FINER);
+		Cheat.setLoggerLevelDisplay(Level.INFO);
 		
 		Client client = new SimpleClient("localhost", 8080);
 		Thread t1;

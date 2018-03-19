@@ -2,9 +2,9 @@ package server;
 
 import java.io.IOException;
 import java.nio.channels.ServerSocketChannel;
-import java.util.Optional;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Set;
-import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeSet;
 import java.util.logging.Level;
@@ -28,6 +28,7 @@ public class SimpleServer extends AbstractServer {
 	
 	private final Set<ClientIdentifier> clients;
 	private final Set<ClientIdentifier> activeClients;
+	private final Deque<ClientIdentifier> clientQueue = new ArrayDeque<>();
 	
 	private Explorer explorer;
 	private ServerSocketChannel serverSocket;
@@ -39,15 +40,15 @@ public class SimpleServer extends AbstractServer {
 		super(port);
 		this.clients = new TreeSet<>();
 		this.activeClients = new TreeSet<>();
-		new Timer().scheduleAtFixedRate(new TimerTask() {
+		TimerTask task = new TimerTask() {
 			
 			@Override
 			public void run() {
 				System.out.println(activeClients.size() + " clients registered");
 				System.out.println(activeClients.size() + " clients active");
-				
 			}
-		}, 0, 5_000);
+		};
+		//new Timer().scheduleAtFixedRate(task, 0, 5_000);
 		this.protocolHandler = new InactiveServerProtocolHandler(this);
 		this.active = false;
 	}
@@ -153,19 +154,23 @@ public class SimpleServer extends AbstractServer {
 	}
 	
 	public boolean sendRequest(Request request) {
-		Cheat.LOGGER.log(Level.FINER, "Sending " + request + "..");
+		Cheat.LOGGER.log(Level.FINER, "Selecting a client..");
+		/*
 		Optional<ClientIdentifier> optionnalClient = activeClients.stream().findAny();
 		if(!optionnalClient.isPresent()) {
 			Cheat.LOGGER.log(Level.WARNING, "No active client to send request.");
 			return false;
 		}
 		ClientIdentifier clientId = optionnalClient.get();
+		*/
+		ClientIdentifier clientId = clientQueue.pop();
 		sendRequest(clientId, request);
+		clientQueue.addLast(clientId);
 		return true;
 	}
 
 	public static void main(String[] args) {
-		Cheat.setLoggerLevelDisplay(Level.ALL);
+		Cheat.setLoggerLevelDisplay(Level.INFO);
 		
 		Server server = new SimpleServer(8080);
 		Thread t1;
@@ -194,9 +199,11 @@ public class SimpleServer extends AbstractServer {
 	public void setClientActivity(ClientIdentifier clientId, boolean active) {
 		if(active) {
 			activeClients.add(clientId);
+			clientQueue.add(clientId);
 			Cheat.LOGGER.log(Level.INFO, clientId + " is now active.");
 		} else {
 			activeClients.remove(clientId);
+			clientQueue.remove(clientId);
 			Cheat.LOGGER.log(Level.INFO, clientId + " is now inactive.");
 		}
 	}

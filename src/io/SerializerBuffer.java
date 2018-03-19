@@ -14,7 +14,7 @@ import java.util.logging.Level;
 import util.Cheat;
 
 public class SerializerBuffer {
-	private static final int BUFFER_SIZE = 2048;
+	private static final int BUFFER_SIZE = 512;
 	
 	private final ByteBuffer buffer;
 	
@@ -175,9 +175,11 @@ public class SerializerBuffer {
 	}
 	
 	public void putString(String s) {
-		tryFlowException(() -> {
-			buffer.putInt(s.length());
-			buffer.put(Cheat.CHARSET.encode(s));
+		tryFlowException(() -> { 
+			ByteBuffer bbs = Cheat.CHARSET.encode(s);
+			int length = bbs.remaining();
+			buffer.putInt(length);
+			buffer.put(bbs);
 			return Void.TYPE;
 		});
 	}
@@ -186,11 +188,8 @@ public class SerializerBuffer {
 		return tryFlowException(() -> {
 			int length = buffer.getInt();
 			int limit = buffer.limit();
-			if(length > buffer.capacity())
-				return "ERROR";
-			if(buffer.position()+length > buffer.limit()) {
+			if(buffer.position()+length > buffer.limit())
 				throw new BufferUnderflowException();
-			}
 			buffer.limit(buffer.position()+length);
 			String s = Cheat.CHARSET.decode(buffer).toString();
 			buffer.limit(limit);

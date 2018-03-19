@@ -61,7 +61,7 @@ public class ProcessUnit implements Callable<Set<String>>{
 		URLConnection uc = connect(hostname);
 		Cheat.LOGGER.log(Level.FINE, "Unit " + Thread.currentThread().getId() + " connected to " + hostname);
 		Set<String> links = getContent(uc.getInputStream());
-		Cheat.LOGGER.log(Level.FINE, "Unit " + Thread.currentThread().getId() + " has found " + links.size() + " links from url: " + hostname);
+		Cheat.LOGGER.log(Level.INFO, "Unit " + Thread.currentThread().getId() + " has found " + links.size() + " links from url: " + hostname);
 		return links;
 	}
 	

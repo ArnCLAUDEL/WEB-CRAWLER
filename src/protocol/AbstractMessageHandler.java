@@ -28,7 +28,7 @@ public abstract class AbstractMessageHandler implements Runnable {
 					serializerBuffer.wait();
 				}
 			} catch (InterruptedException e) {
-				Cheat.LOGGER.log(Level.WARNING, e.getMessage(), e);
+				shutdown();
 			}
 		};
 	}

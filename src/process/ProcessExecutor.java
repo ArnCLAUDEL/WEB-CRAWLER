@@ -15,7 +15,7 @@ import util.Cheat;
 
 public class ProcessExecutor implements Executor {
 	public final static int THREAD_CAPACITY = Runtime.getRuntime().availableProcessors();
-	public final static int TASK_CAPACITY = 100;
+	public final static int TASK_CAPACITY = 2000;
 		
 	private final List<Thread> threads = new ArrayList<>(THREAD_CAPACITY);
 	private final List<TaskExecutor> taskExecutors = new ArrayList<>(THREAD_CAPACITY);
@@ -81,12 +81,16 @@ public class ProcessExecutor implements Executor {
 		while(!taskSubmitted) {
 			try {
 				synchronized (queue) {
-					queue.put(runnable);
+					queue.add(runnable);
 					queue.notifyAll();
 				}
 				taskSubmitted = true;
-			} catch (InterruptedException e) {
-				Cheat.LOGGER.log(Level.WARNING, "Interruption during task submission", e);
+			//} catch (InterruptedException e) {
+				
+			} catch (IllegalStateException e) {
+				Cheat.LOGGER.log(Level.WARNING, "Queue full", e);
+				// TODO
+				taskSubmitted = true;
 			}
 		}
 	}
@@ -94,7 +98,7 @@ public class ProcessExecutor implements Executor {
 	public <T> Future<T> submit(Callable<T> callable) {
 		ProcessTask<T> task = new ProcessTask<T>(callable);
 		execute(task);
-		Cheat.LOGGER.log(Level.FINER, "New task submitted");
+		Cheat.LOGGER.log(Level.INFO, "New task submitted, tasks : " + queue.size() + ", workers :" + taskExecutors.size());
 		return task;
 	}
 	

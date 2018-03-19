@@ -24,6 +24,7 @@ public class ClientNetworkHandler extends AbstractNetworkHandler {
 	@Override
 	protected void channelClosedCallback(SelectionKey sk) throws IOException {
 		super.channelClosedCallback(sk);
+		messageHandler.shutdown();
 		Cheat.LOGGER.log(Level.INFO, "Server disconnected.");
 	}
 

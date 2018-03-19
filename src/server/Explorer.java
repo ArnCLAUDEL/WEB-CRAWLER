@@ -2,6 +2,7 @@ package server;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -34,11 +35,14 @@ public class Explorer {
 		sendRequests();
 		Cheat.LOGGER.log(Level.FINER, "Reply processed.");
 		System.out.println();
-		long count = links.entrySet().stream()
-				.filter(e -> e.getValue() == STATE.EXPLORED)
-				.map(Map.Entry::getKey)
-				.count();
-		System.out.println(count + " url explored");
+		Map<STATE, List<String>> count = links.entrySet().stream()
+				.collect(Collectors.groupingBy(Map.Entry::getValue, Collectors.mapping(Map.Entry::getKey, Collectors.toList())));
+		
+		System.out.println(count.getOrDefault(STATE.NOT_EXPLORED, new ArrayList<>()).size() + " url not explored");
+		System.out.println(count.getOrDefault(STATE.EXPLORING, new ArrayList<>()).size() + " url pending");
+		System.out.println(count.getOrDefault(STATE.EXPLORED, new ArrayList<>()).size() + " url explored");
+		
+		
 	}
 	
 	public synchronized void sendRequests() {
