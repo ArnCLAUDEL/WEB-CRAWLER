@@ -1,22 +1,19 @@
 package protocol;
 
-import java.nio.channels.WritableByteChannel;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
-import io.SerializerBuffer;
 import util.Cheat;
+import util.SerializerBuffer;
 
 public abstract class AbstractMessageHandler implements Runnable {
 	protected final SerializerBuffer serializerBuffer;
-	protected final WritableByteChannel channel;
 	
 	private boolean stop;
 
-	public AbstractMessageHandler(SerializerBuffer serializerBuffer, WritableByteChannel channel) {
+	public AbstractMessageHandler(SerializerBuffer serializerBuffer) {
 		this.serializerBuffer = serializerBuffer;
 		this.serializerBuffer.setUnderflowCallback(underflowCallback());
-		this.channel = channel;
 		this.stop = false;
 	}
 	

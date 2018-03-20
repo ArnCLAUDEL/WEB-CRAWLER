@@ -1,11 +1,8 @@
 package client;
 
-import java.nio.channels.WritableByteChannel;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
-import io.Creator;
-import io.SerializerBuffer;
 import protocol.Abort;
 import protocol.AbstractMessageHandler;
 import protocol.Flag;
@@ -13,13 +10,15 @@ import protocol.Message;
 import protocol.Ok;
 import protocol.Request;
 import util.Cheat;
+import util.Creator;
+import util.SerializerBuffer;
 
 public class ClientMessageHandler extends AbstractMessageHandler {
 
 	private final Client client;
 	
-	public ClientMessageHandler(SerializerBuffer serializerBuffer, WritableByteChannel channel, Client client) {
-		super(serializerBuffer, channel);
+	public ClientMessageHandler(SerializerBuffer serializerBuffer, Client client) {
+		super(serializerBuffer);
 		this.client = client;
 	}
 

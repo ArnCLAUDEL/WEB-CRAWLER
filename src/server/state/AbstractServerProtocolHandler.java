@@ -1,10 +1,11 @@
 package server.state;
 
+import java.io.IOException;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 import protocol.Abort;
 import protocol.AbstractProtocolHandler;
-import protocol.ClientIdentifier;
 import protocol.Decline;
 import protocol.Forget;
 import protocol.Init;
@@ -12,11 +13,13 @@ import protocol.Message;
 import protocol.Ok;
 import protocol.Reply;
 import protocol.Request;
-import protocol.ServerProtocolHandler;
 import protocol.StartService;
 import protocol.StopService;
+import server.ClientIdentifier;
 import server.Server;
+import server.ServerProtocolHandler;
 import util.Cheat;
+import util.SerializerBuffer;
 
 public abstract class AbstractServerProtocolHandler extends AbstractProtocolHandler implements ServerProtocolHandler {
 
@@ -27,8 +30,41 @@ public abstract class AbstractServerProtocolHandler extends AbstractProtocolHand
 		this.server = server;
 	}
 	
-	protected boolean send(ClientIdentifier clientId, Message message) {
-		return send(clientId.getChannel(), message);
+	protected boolean send(ClientIdentifier clientId, SerializerBuffer serializerBuffer) {
+		try {
+			int nb = server.write(clientId, serializerBuffer);
+			Cheat.LOGGER.log(Level.FINEST, nb + " bytes sent.");
+			return true;
+		} catch (IOException e) {
+			Cheat.LOGGER.log(Level.WARNING, "Fail to send data.", e);
+			return false;
+		}
+	}
+	
+	protected Consumer<? super SerializerBuffer> getFlushCallback(ClientIdentifier clientId) {
+		return (serializerBuffer) -> {
+			Cheat.LOGGER.log(Level.FINER, "Flushing data..");
+			serializerBuffer.flip();
+			send(clientId, serializerBuffer);
+			serializerBuffer.clear();
+			Cheat.LOGGER.log(Level.FINER, "Data sent and buffer cleared.");
+		};
+	}
+	
+	protected boolean send(ClientIdentifier clientId) {
+		return send(clientId, serializerBuffer);
+	}
+	
+	protected synchronized boolean send(ClientIdentifier clientId, Message message) {
+		serializerBuffer.clear();
+		serializerBuffer.put(message.getFlag());
+		message.writeToBuff(serializerBuffer);
+		serializerBuffer.flip();
+		if(send(clientId)) {
+			Cheat.LOGGER.log(Level.FINER, "Message " + message + " sent.");
+			return true;
+		}
+		return false;
 	}
 	
 	@Override

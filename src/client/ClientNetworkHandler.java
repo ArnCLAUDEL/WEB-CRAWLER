@@ -7,19 +7,29 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 
-import io.AbstractNetworkHandler;
+import io.AbstractTCPNetworkHandler;
 import util.Cheat;
+import util.SerializerBuffer;
 
-public class ClientNetworkHandler extends AbstractNetworkHandler {
+public class ClientNetworkHandler extends AbstractTCPNetworkHandler implements NetworkWriter {
 	
 	private final ClientMessageHandler messageHandler;
 	private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
+	private SocketChannel channel;
+	
 	public ClientNetworkHandler(SocketChannel channel, Client client) throws IOException {
 		super(channel, SelectionKey.OP_READ, client);
-		this.messageHandler = new ClientMessageHandler(getSerializerBuffer(channel), channel, client);
+		this.messageHandler = new ClientMessageHandler(getSerializerBuffer(channel), client);
+		this.channel = channel;
 		executor.execute(messageHandler);
 	}	
+	
+	public int write(SerializerBuffer serializerBuffer) throws IOException {
+		if(channel == null)
+			throw new NullPointerException("Excepting a non-null SocketChannel.");
+		return serializerBuffer.write(channel);
+	}
 	
 	@Override
 	protected void channelClosedCallback(SelectionKey sk) throws IOException {

@@ -3,8 +3,8 @@ package protocol;
 import java.util.HashSet;
 import java.util.Set;
 
-import io.Creator;
-import io.SerializerBuffer;
+import util.Creator;
+import util.SerializerBuffer;
 
 public class Reply extends Message {
 	public static final Creator<Reply> CREATOR = Reply::new;

@@ -1,61 +1,66 @@
 package server;
 
 import java.io.IOException;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.nio.channels.WritableByteChannel;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 
-import io.AbstractNetworkHandler;
-import io.SerializerBuffer;
-import protocol.ClientIdentifier;
+import io.AbstractTCPNetworkHandler;
 import util.Cheat;
+import util.SerializerBuffer;
 
-public class ServerNetworkHandler extends AbstractNetworkHandler {
-
+public class ServerNetworkHandler extends AbstractTCPNetworkHandler implements NetworkWriter {
 	private final ExecutorService executor = Executors.newCachedThreadPool();
-	private final Map<WritableByteChannel, ClientIdentifier> clientsId;
-	private final Map<ReadableByteChannel, ServerMessageHandler> clientsMessageHandler;
+	private final Map<SocketChannel, ServerMessageHandler> clientsMessageHandler;
+	private final Map<ClientIdentifier, SocketChannel> clientsChannel;
+	private final Map<SocketChannel, ClientIdentifier> channelsClient;
 	private final Server server;
 	
 	public ServerNetworkHandler(ServerSocketChannel channel, Server server) throws IOException {
 		super(channel, SelectionKey.OP_ACCEPT, server);
 		this.server = server;
-		this.clientsId = new HashMap<>();
 		this.clientsMessageHandler = new HashMap<>();
+		this.clientsChannel = new HashMap<>();
+		this.channelsClient = new HashMap<>();
 	}
 	
-	public void addClient(WritableByteChannel channel, ClientIdentifier clientId) {
-		this.clientsId.put(channel, clientId);
+	public void update(ClientIdentifier oldClientId, ClientIdentifier newClientId) {
+		SocketChannel channel = clientsChannel.remove(oldClientId);
+		if(channel != null) {
+			clientsChannel.put(newClientId, channel);
+			channelsClient.put(channel, newClientId);
+		}
 	}
 	
 	private void remove(SocketChannel channel) {
 		ServerMessageHandler messageHandler = this.clientsMessageHandler.remove(channel);
-		ClientIdentifier clientId = this.clientsId.remove(channel);
 		messageHandler.shutdown();
-		server.removeClient(clientId);
+		ClientIdentifier clientId = channelsClient.remove(channel);
+		clientsChannel.remove(clientId);
+		server.setClientActivity(clientId, false);
 	}
 	
 	@Override
-	protected void handleAcceptOperation(SelectionKey sk) {
-		Cheat.LOGGER.log(Level.FINER, "Handling ACCEPT_OPERATION..");
-		try {
-			SocketChannel socket = ((ServerSocketChannel) sk.channel()).accept();
-			addChannel(socket, SelectionKey.OP_READ);
-			SerializerBuffer serializerBuffer = getSerializerBuffer(socket);
-			ServerMessageHandler messageHandler = new ServerMessageHandler(server, serializerBuffer, this, socket);
-			executor.execute(messageHandler);
-			clientsMessageHandler.put(socket, messageHandler);
-			Cheat.LOGGER.log(Level.INFO,"Connection from " + socket.getRemoteAddress() + " accepted");
-		} catch (IOException e) {
-			Cheat.LOGGER.log(Level.WARNING, "Error while handling ACCEPT_OPERATION.", e);
-		}
+	public int write(ClientIdentifier clientId, SerializerBuffer serializerBuffer) throws IOException {
+		SocketChannel channel = clientsChannel.get(clientId);
+		if(channel == null)
+			return -1;
+		return write(channel, serializerBuffer);
+	}
+	
+	@Override
+	protected void register(SocketChannel channel, SerializerBuffer buffer) {
+		ClientIdentifier clientId = ClientIdentifier.makeUnregistered();
+		ServerMessageHandler messageHandler = new ServerMessageHandler(server, buffer, clientId);
+		executor.execute(messageHandler);
+		clientsMessageHandler.put(channel, messageHandler);
+		clientsChannel.put(clientId, channel);
+		channelsClient.put(channel, clientId);
 	}
 	
 	@Override

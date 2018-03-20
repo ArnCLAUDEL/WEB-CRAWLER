@@ -14,7 +14,6 @@ import client.state.NotConnectedClientProtocolHandler;
 import io.AbstractIOEntity;
 import process.ProcessExecutor;
 import protocol.Abort;
-import protocol.ClientProtocolHandler;
 import protocol.Decline;
 import protocol.Forget;
 import protocol.Init;
@@ -24,6 +23,7 @@ import protocol.Request;
 import protocol.StartService;
 import protocol.StopService;
 import util.Cheat;
+import util.SerializerBuffer;
 
 public class SimpleClient extends AbstractIOEntity implements Client {
 
@@ -35,6 +35,7 @@ public class SimpleClient extends AbstractIOEntity implements Client {
 	private SocketChannel channel;
 	private boolean connected;
 	private ClientProtocolHandler protocolHandler;
+	private ClientNetworkHandler networkHandler;
 	
 	public SimpleClient(String hostname, int port, long previousId) {
 		super("Client " + Cheat.getId());
@@ -77,20 +78,22 @@ public class SimpleClient extends AbstractIOEntity implements Client {
 		});
 	}
 	
-	@Override
-	protected void init() throws IOException {
+	
+	private void init() throws IOException {
 		this.channel = connect(hostname, port);
-		this.protocolHandler = new InitClientProtocolHandler(this, channel);
+		startHandlers();
+		this.protocolHandler = new InitClientProtocolHandler(this);
 	}
 	
-	@Override
-	protected void startHandlers() throws IOException {
-		addHandler(new ClientNetworkHandler(channel, this));
+	private void startHandlers() throws IOException {
+		this.networkHandler = new ClientNetworkHandler(channel, this);
+		addHandler(networkHandler);
 		addHandler(new ClientKeyboardHandler(channel));
 	}
 	
 	@Override
 	protected void start() throws IOException {
+		init();
 		protocolHandler.sendInit(new Init(getName(), ProcessExecutor.TASK_CAPACITY, ProcessExecutor.THREAD_CAPACITY, id));
 	}
 	
@@ -163,7 +166,7 @@ public class SimpleClient extends AbstractIOEntity implements Client {
 	}
 
 	public static void main(String[] args) throws IOException {
-		Cheat.setLoggerLevelDisplay(Level.INFO);
+		Cheat.setLoggerLevelDisplay(Level.ALL);
 		
 		Client client = new SimpleClient("localhost", 8080);
 		Thread t1;
@@ -174,6 +177,11 @@ public class SimpleClient extends AbstractIOEntity implements Client {
 		try { t1.join();} 
 		catch (InterruptedException e) {}
 		finally {System.exit(0);}
+	}
+	
+	@Override
+	public int write(SerializerBuffer serializerBuffer) throws IOException {
+		return networkHandler.write(serializerBuffer);
 	}
 
 	@Override

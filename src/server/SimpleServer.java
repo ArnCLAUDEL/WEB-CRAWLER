@@ -10,19 +10,18 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 
 import protocol.Abort;
-import protocol.ClientIdentifier;
 import protocol.Decline;
 import protocol.Forget;
 import protocol.Init;
 import protocol.Ok;
 import protocol.Reply;
 import protocol.Request;
-import protocol.ServerProtocolHandler;
 import protocol.StartService;
 import protocol.StopService;
 import server.state.ActiveServerProtocolHandler;
 import server.state.InactiveServerProtocolHandler;
 import util.Cheat;
+import util.SerializerBuffer;
 
 public class SimpleServer extends AbstractServer {
 	
@@ -33,6 +32,7 @@ public class SimpleServer extends AbstractServer {
 	private Explorer explorer;
 	private ServerSocketChannel serverSocket;
 	private ServerProtocolHandler protocolHandler;
+	private ServerNetworkHandler networkHandler;
 	
 	private boolean active;
 	
@@ -74,23 +74,23 @@ public class SimpleServer extends AbstractServer {
 		Cheat.LOGGER.log(Level.INFO, "Request sent to clients.");
 	}
 	
-	@Override
-	protected void init() throws IOException {
+	private void init() throws IOException {
 		serverSocket = ServerSocketChannel.open();
 		serverSocket.bind(address);
 		active = true;
+		startHandlers();
 		this.protocolHandler = new ActiveServerProtocolHandler(this);
 	}
 	
-	@Override
-	protected void startHandlers() throws IOException {
-		addHandler(new ServerNetworkHandler(serverSocket, this));
+	private void startHandlers() throws IOException {
+		this.networkHandler = new ServerNetworkHandler(serverSocket, this);
+		addHandler(networkHandler);
 		addHandler(new ServerKeyboardHandler(this));
 	}
 	
 	@Override
 	protected void start() throws IOException {
-		
+		init();
 	}
 	
 	@Override
@@ -170,7 +170,7 @@ public class SimpleServer extends AbstractServer {
 	}
 
 	public static void main(String[] args) {
-		Cheat.setLoggerLevelDisplay(Level.INFO);
+		Cheat.setLoggerLevelDisplay(Level.ALL);
 		
 		Server server = new SimpleServer(8080);
 		Thread t1;
@@ -206,6 +206,16 @@ public class SimpleServer extends AbstractServer {
 			clientQueue.remove(clientId);
 			Cheat.LOGGER.log(Level.INFO, clientId + " is now inactive.");
 		}
+	}
+
+	@Override
+	public int write(ClientIdentifier clientId, SerializerBuffer serializerBuffer) throws IOException {
+		return networkHandler.write(clientId, serializerBuffer);
+	}
+	
+	@Override
+	public void update(ClientIdentifier oldClientId, ClientIdentifier newClientId) {
+		networkHandler.update(oldClientId, newClientId);
 	}
 	
 }

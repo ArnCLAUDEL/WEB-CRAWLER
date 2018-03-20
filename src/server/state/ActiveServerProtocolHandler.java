@@ -3,7 +3,6 @@ package server.state;
 import java.util.logging.Level;
 
 import protocol.Abort;
-import protocol.ClientIdentifier;
 import protocol.Decline;
 import protocol.Forget;
 import protocol.Init;
@@ -12,6 +11,7 @@ import protocol.Reply;
 import protocol.Request;
 import protocol.StartService;
 import protocol.StopService;
+import server.ClientIdentifier;
 import server.Server;
 import util.Cheat;
 

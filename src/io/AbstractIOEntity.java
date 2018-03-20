@@ -27,19 +27,12 @@ public abstract class AbstractIOEntity implements IOEntity {
 		return name;
 	}
 	
-	protected abstract void init() throws IOException;
-	
-	protected abstract void startHandlers() throws IOException;
-	
 	protected abstract void start() throws IOException;
 	
 	@Override
 	public void run() {
 		Cheat.LOGGER.log(Level.INFO, this + " starting.");
 		try {
-			init();
-			Cheat.LOGGER.log(Level.INFO, this + " activated.");
-			startHandlers();
 			start();
 			while(!stop) {
 				try {

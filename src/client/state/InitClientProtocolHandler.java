@@ -1,7 +1,5 @@
 package client.state;
 
-import java.nio.channels.SocketChannel;
-
 import client.Client;
 import protocol.Decline;
 import protocol.Init;
@@ -9,14 +7,14 @@ import protocol.Request;
 
 public class InitClientProtocolHandler extends AbstractClientProtocolHandler {
 	
-	public InitClientProtocolHandler(Client client, SocketChannel channel) {
-		super(client, channel);
+	public InitClientProtocolHandler(Client client) {
+		super(client);
 	}
 
 	@Override
 	public void sendInit(Init init) {
 		send(init);
-		client.setProtocolHandler(new InitSentClientProtocolHandler(client, channel, init));
+		client.setProtocolHandler(new InitSentClientProtocolHandler(client, init));
 	}
 	
 	@Override

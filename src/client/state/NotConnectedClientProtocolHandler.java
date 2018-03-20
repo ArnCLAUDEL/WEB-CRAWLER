@@ -5,7 +5,7 @@ import client.Client;
 public class NotConnectedClientProtocolHandler extends AbstractClientProtocolHandler {
 
 	public NotConnectedClientProtocolHandler(Client client) {
-		super(client, null);
+		super(client);
 	}
 
 	@Override

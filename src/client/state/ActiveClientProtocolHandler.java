@@ -1,6 +1,5 @@
 package client.state;
 
-import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
 
 import client.Client;
@@ -14,8 +13,8 @@ import util.Cheat;
 
 public class ActiveClientProtocolHandler extends AbstractClientProtocolHandler {
 	
-	public ActiveClientProtocolHandler(Client client, SocketChannel channel) {
-		super(client, channel);
+	public ActiveClientProtocolHandler(Client client) {
+		super(client);
 	}
 	
 	@Override
@@ -31,13 +30,13 @@ public class ActiveClientProtocolHandler extends AbstractClientProtocolHandler {
 	@Override
 	public void sendStopService(StopService stopService) {
 		send(stopService);
-		client.setProtocolHandler(new InactiveClientProtocolHandler(client, channel));
+		client.setProtocolHandler(new InactiveClientProtocolHandler(client));
 	}
 	
 	@Override
 	public void sendForget(Forget forget) {
 		send(forget);
-		client.setProtocolHandler(new InitClientProtocolHandler(client, channel));
+		client.setProtocolHandler(new InitClientProtocolHandler(client));
 	}
 	
 	@Override

@@ -1,7 +1,7 @@
 package protocol;
 
-import io.Creator;
-import io.SerializerBuffer;
+import util.Creator;
+import util.SerializerBuffer;
 
 public class StopService extends Message {
 	public static final Creator<StopService> CREATOR = StopService::new;

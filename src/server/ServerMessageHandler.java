@@ -1,14 +1,9 @@
 package server;
 
-import java.nio.channels.WritableByteChannel;
-import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
 
-import io.Creator;
-import io.SerializerBuffer;
 import protocol.AbstractMessageHandler;
-import protocol.ClientIdentifier;
 import protocol.Decline;
 import protocol.Flag;
 import protocol.Forget;
@@ -18,37 +13,26 @@ import protocol.Reply;
 import protocol.StartService;
 import protocol.StopService;
 import util.Cheat;
+import util.Creator;
+import util.SerializerBuffer;
 
 public class ServerMessageHandler extends AbstractMessageHandler {
 
 	private final Server server;
-	private final ServerNetworkHandler networkHandler;
+	private ClientIdentifier clientId;
 	
-	private Optional<ClientIdentifier> optionalClientId;
-	
-	public ServerMessageHandler(Server server, SerializerBuffer serializerBuffer, ServerNetworkHandler networkHandler, WritableByteChannel channel) {
-		super(serializerBuffer, channel);
+	public ServerMessageHandler(Server server, SerializerBuffer serializerBuffer, ClientIdentifier clientId) {
+		super(serializerBuffer);
 		this.server = server;
-		this.networkHandler = networkHandler;
-		this.optionalClientId = Optional.empty();
+		this.clientId = clientId;
 	}
 	
 	protected void handleProtocol() {
 		synchronized (serializerBuffer) {
 			byte flag = serializerBuffer.get();
-			if(flag == Flag.INIT) {
-				handleInit();
-				return;
-			}	
-			
-			if(!optionalClientId.isPresent()) {
-				Cheat.LOGGER.log(Level.WARNING, "Missing ClientIdentifier.");
-				return;
-			}
-			
-			ClientIdentifier clientId = optionalClientId.get();
-			
+				
 			switch(flag) {
+				case Flag.INIT: handleInit(); break;
 				case Flag.FORGET: handleForget(clientId); break;
 				case Flag.START_SERVICE: handleStartService(clientId); break;
 				case Flag.STOP_SERVICE: handleStopService(clientId); break;
@@ -70,15 +54,14 @@ public class ServerMessageHandler extends AbstractMessageHandler {
 		Init init = Init.CREATOR.init();
 		init.readFromBuff(serializerBuffer);
 		
-		ClientIdentifier clientId = new ClientIdentifier.BUILDER(init.getName(), channel)
+		ClientIdentifier clientId = new ClientIdentifier.BUILDER(init.getName())
 														.nbTaskMax(init.getNbTaskMax())
 														.nbProcessUnits(init.getNbProcessUnits())
 														.build();
 		
-		if(server.handleInit(clientId, init)) {
-			this.optionalClientId = Optional.of(clientId);
-			this.networkHandler.addClient(channel, clientId);
-		}
+		server.update(this.clientId, clientId);
+		server.handleInit(clientId, init);
+		this.clientId = clientId;			
 	}
 	
 	private void handleForget(ClientIdentifier clientId) {

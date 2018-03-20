@@ -1,4 +1,14 @@
-package protocol;
+package server;
+
+import protocol.Abort;
+import protocol.Decline;
+import protocol.Forget;
+import protocol.Init;
+import protocol.Ok;
+import protocol.Reply;
+import protocol.Request;
+import protocol.StartService;
+import protocol.StopService;
 
 public interface ServerProtocolHandler {
 	boolean handleInit(ClientIdentifier clientId, Init init);

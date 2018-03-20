@@ -4,17 +4,17 @@ import java.io.IOException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
-import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
 
 import util.Cheat;
+import util.SerializerBuffer;
 
 public abstract class AbstractNetworkHandler extends AbstractHandler {
-	private final Map<SelectableChannel, Integer> channelOps = new HashMap<>();
-	private final Map<SelectableChannel, SerializerBuffer> channelBuffers = new HashMap<>();
+	private final Map<SelectableChannel, Integer> channelOps;
+	private final Map<SelectableChannel, SerializerBuffer> channelBuffers;
 	private final Selector selector;
 	private final IOEntity ioEntity;
 	
@@ -22,10 +22,12 @@ public abstract class AbstractNetworkHandler extends AbstractHandler {
 	
 	public AbstractNetworkHandler(SelectableChannel channel, int op, IOEntity ioEntity) throws IOException {
 		super();
+		this.channelOps =  new HashMap<>();
+		this.channelBuffers = new HashMap<>();
 		this.selector = Selector.open();
 		this.ioEntity = ioEntity;
-		addChannel(channel, op);
 		this.stop = false;
+		addChannel(channel, op);
 	}
 	
 	protected void addChannel(SelectableChannel channel, int op) throws IOException {
@@ -65,8 +67,14 @@ public abstract class AbstractNetworkHandler extends AbstractHandler {
 				if(checkOps(sk, SelectionKey.OP_ACCEPT))
 					handleAcceptOperation(sk);
 				
+				else if(checkOps(sk, SelectionKey.OP_CONNECT))
+					handleConnectOperation(sk);
+				
 				else if(checkOps(sk, SelectionKey.OP_READ))
 					handleReadOperation(sk, channelBuffers.get(sk.channel()));
+				
+				else if(checkOps(sk, SelectionKey.OP_WRITE))
+					handleWriteOperation(sk, channelBuffers.get(sk.channel()));
 				
 				itr.remove();
 			}
@@ -80,27 +88,10 @@ public abstract class AbstractNetworkHandler extends AbstractHandler {
 		sk.channel().close();
 	}
 	
-	protected void handleAcceptOperation(SelectionKey sk) {
-		Cheat.LOGGER.log(Level.FINER, "Handling ACCEPT_OPERATION..");
-	}
-
-	protected void handleReadOperation(SelectionKey sk, SerializerBuffer serializerBuffer) {
-		Cheat.LOGGER.log(Level.FINER, "Handling READ_OPERATION..");
-		SocketChannel sc = (SocketChannel) sk.channel();
-		try {
-			synchronized (serializerBuffer) {
-				serializerBuffer.compact();
-				int read = serializerBuffer.read(sc);
-				if(read < 0) {
-					channelClosedCallback(sk);
-				}
-				serializerBuffer.flip();
-				serializerBuffer.notifyAll();
-			}
-		} catch (IOException e) {
-			Cheat.LOGGER.log(Level.WARNING, "Error while handling READ_OPERATION.", e);
-		}
-	}
+	protected abstract void handleAcceptOperation(SelectionKey sk);
+	protected abstract void handleConnectOperation(SelectionKey sk);
+	protected abstract void handleReadOperation(SelectionKey sk, SerializerBuffer serializerBuffer);
+	protected abstract void handleWriteOperation(SelectionKey sk, SerializerBuffer serializerBuffer);
 
 	@Override
 	public String toString() {

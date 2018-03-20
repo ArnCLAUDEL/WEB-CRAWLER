@@ -1,6 +1,4 @@
-package protocol;
-
-import java.nio.channels.WritableByteChannel;
+package server;
 
 import util.Cheat;
 
@@ -8,24 +6,18 @@ public class ClientIdentifier implements Comparable<ClientIdentifier> {
 	
 	public static final class BUILDER {
 		private String name;
-		private WritableByteChannel channel;
 		private int nbTaskMax;
 		private int nbProcessUnits;
 		private int nbRequestsSent;
 		private int nbSuccessfulRequests;
 		private int nbDeclinedRequests;
 		
-		public BUILDER(String name, WritableByteChannel channel) {
-			if(channel == null)
-				throw new IllegalArgumentException("Excepting a non-null SocketChannel");
-			
+		public BUILDER(String name) {
 			this.name = name;
-			this.channel = channel;
-			channel.hashCode();
 		}
 		
 		public ClientIdentifier build() {
-			return new ClientIdentifier(name, channel, nbTaskMax, nbProcessUnits, nbSuccessfulRequests, nbRequestsSent, nbDeclinedRequests);
+			return new ClientIdentifier(name, nbTaskMax, nbProcessUnits, nbSuccessfulRequests, nbRequestsSent, nbDeclinedRequests);
 		}
 		
 		public BUILDER nbTaskMax(int nbTaskMax) {
@@ -58,31 +50,33 @@ public class ClientIdentifier implements Comparable<ClientIdentifier> {
 	private final long id;
 	private final String name;
 	
-	private WritableByteChannel channel;
 	private int nbTaskMax = 1;
 	private int nbProcessUnits = 1;
 	private int nbSuccessfulRequests = 0;
 	private int nbDeclinedRequests = 0;
 	private int nbRequestsSent = 0;
 	
-	private ClientIdentifier(String name, WritableByteChannel channel, int nbTaskMax, int nbProcessUnits,
+	private ClientIdentifier(String name, int nbTaskMax, int nbProcessUnits,
 			int nbSuccessfulRequests, int nbRequestsSent, int nbDeclinedRequests) {		
-		this.id = channel.hashCode();
+		this.id = Cheat.getId();
 		this.name = name;
-		this.channel = channel;
 		this.nbTaskMax = nbTaskMax;
 		this.nbProcessUnits = nbProcessUnits;
 		this.nbSuccessfulRequests = nbSuccessfulRequests;
 		this.nbDeclinedRequests = nbDeclinedRequests;
 	}
 	
-	public ClientIdentifier(String name, WritableByteChannel channel) {
-		if(channel == null)
-			throw new IllegalArgumentException("Excepting a non-null WritableByteChannel");
-		
-		this.id = channel.hashCode() + Cheat.RANDOM.nextInt(1_000_000);
+	private ClientIdentifier(String name, long id) {
+		this.id = Cheat.getId();
 		this.name = name;
-		this.channel = channel;
+	}
+	
+	public ClientIdentifier(String name) {
+		this(name, Cheat.getId());
+	}
+	
+	public static ClientIdentifier makeUnregistered() {
+		return new ClientIdentifier("Unregistered ClientIdentifier", -1);
 	}
 
 	@Override
@@ -96,10 +90,6 @@ public class ClientIdentifier implements Comparable<ClientIdentifier> {
 
 	public String getName() {
 		return name;
-	}
-
-	public WritableByteChannel getChannel() {
-		return channel;
 	}
 
 	public int getNbTaskMax() {

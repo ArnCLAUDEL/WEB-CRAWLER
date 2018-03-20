@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.channels.SocketChannel;
 
 import io.AbstractKeyboardHandler;
-import io.SerializerBuffer;
+import util.SerializerBuffer;
 
 public class ClientKeyboardHandler extends AbstractKeyboardHandler {
 

@@ -1,17 +1,17 @@
-package io;
+package util;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.channels.DatagramChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
-
-import util.Cheat;
 
 public class SerializerBuffer {
 	private static final int BUFFER_SIZE = 512;
@@ -64,6 +64,14 @@ public class SerializerBuffer {
 	
 	public ByteBuffer getBuffer() {
 		return buffer;
+	}
+	
+	public SocketAddress receive(DatagramChannel channel) throws IOException{
+		return channel.receive(buffer);
+	}
+	
+	public int send(DatagramChannel channel, SocketAddress target) throws IOException {
+		return channel.send(buffer, target);
 	}
 	
 	public int read(ReadableByteChannel channel) throws IOException {
@@ -137,6 +145,11 @@ public class SerializerBuffer {
 
 	public final int remaining() {
 		return buffer.remaining();
+	}
+	
+	public SerializerBuffer put(SerializerBuffer serializerBuffer) {
+		tryFlowException(() -> buffer.put(serializerBuffer.buffer));
+		return this;
 	}
 
 	public SerializerBuffer put(byte value) {

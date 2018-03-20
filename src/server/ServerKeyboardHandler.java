@@ -3,8 +3,8 @@ package server;
 import java.io.IOException;
 
 import io.AbstractKeyboardHandler;
-import io.SerializerBuffer;
 import util.Cheat;
+import util.SerializerBuffer;
 
 public class ServerKeyboardHandler extends AbstractKeyboardHandler {
 

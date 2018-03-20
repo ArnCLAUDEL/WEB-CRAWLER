@@ -5,6 +5,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.util.logging.Level;
 
 import util.Cheat;
+import util.SerializerBuffer;
 
 public abstract class AbstractRawInputHandler extends AbstractHandler {
 
