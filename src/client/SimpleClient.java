@@ -60,8 +60,8 @@ public class SimpleClient extends AbstractIOEntity implements Client {
 	}
 	
 	@Override
-	public void scan(String hostname) {
-		Future<Set<String>> future = executor.scan(hostname);
+	public void scan(String hostname,String link) {
+		Future<Set<String>> future = executor.scan(hostname,link);
 		CompletableFuture.supplyAsync(() -> {
 			try {
 				return future.get();

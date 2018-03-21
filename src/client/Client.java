@@ -8,7 +8,7 @@ import protocol.ClientProtocolHandler;
 
 public interface Client extends IOEntity, ClientProtocolHandler  {
 	SocketChannel connect(String hostname, int port) throws IOException;
-	void scan (String hostname);
+	void scan (String hostname,String link);
 	void setProtocolHandler(ClientProtocolHandler protocolHandler);
 	int getNbProcessUnits();
 	int getNbTaskMax();

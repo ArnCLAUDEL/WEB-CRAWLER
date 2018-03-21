@@ -29,7 +29,6 @@ public class Explorer {
 		Cheat.LOGGER.log(Level.FINER, "Processing reply.");
 		links.put(reply.getHostname(), STATE.EXPLORED);
 		reply	.getUrls().stream()
-				.map( url -> hostname.concat(url))
 				.filter(url -> links.getOrDefault(url, STATE.NOT_EXPLORED) == STATE.NOT_EXPLORED)
 				.forEach(url -> links.put(url, STATE.NOT_EXPLORED));
 		sendRequests();

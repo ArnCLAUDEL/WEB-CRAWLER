@@ -20,7 +20,7 @@ public class ServerKeyboardHandler extends AbstractKeyboardHandler {
 		String hostname = Cheat.CHARSET.decode(serializerBuffer.getBuffer()).toString();
 		
 		
-		server.scan(hostname);
+		server.scan(hostname,"");
 	}
 	
 	@Override

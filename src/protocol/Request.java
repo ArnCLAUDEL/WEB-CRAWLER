@@ -7,18 +7,24 @@ public class Request extends Message {
 	public static final Creator<Request> CREATOR = Request::new;
 	
 	private String hostname;
+	private String link;
 	
-	public Request(String hostname) {
+	public Request(String hostname,String link) {
 		super(Flag.REQUEST);
 		this.hostname = hostname;
+		this.link=link;
 	}
 	
 	public Request() {
-		this("www.example.com");
+		this("www.example.com","");
 	}
 	
 	public String getHostname() {
 		return hostname;
+	}
+	
+	public String getLink() {
+		return link;
 	}
 	
 	@Override
