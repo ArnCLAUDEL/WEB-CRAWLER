@@ -56,7 +56,7 @@ public abstract class AbstractNetworkHandler extends AbstractHandler {
 	}
 	
 	@Override
-	public void handle() {
+	protected void handle() {
 		try {
 			Iterator<SelectionKey> itr;
 			SelectionKey sk;

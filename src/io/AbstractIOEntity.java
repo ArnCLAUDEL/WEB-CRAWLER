@@ -8,7 +8,7 @@ import java.util.logging.Level;
 import util.Cheat;
 
 public abstract class AbstractIOEntity implements IOEntity {
-	private final Set<AbstractHandler> handlers;
+	private final Set<Handler> handlers;
 	private final String name;
 	
 	protected boolean stop;
@@ -50,20 +50,20 @@ public abstract class AbstractIOEntity implements IOEntity {
 	@Override
 	public void shutdown() {
 		stop = true;
-		handlers.stream().forEach(AbstractHandler::shutdown);
+		handlers.stream().forEach(Handler::shutdown);
 		synchronized (this) {
 			notifyAll();
 		}
 	}
 	
 	@Override
-	public void addHandler(AbstractHandler handler) {
+	public void addHandler(Handler handler) {
 		this.handlers.add(handler);
 		new Thread(handler).start();
 	}
 
 	@Override
-	public void removeHandler(AbstractHandler handler) {
+	public void removeHandler(Handler handler) {
 		this.handlers.remove(handler);
 		handler.shutdown();
 	}

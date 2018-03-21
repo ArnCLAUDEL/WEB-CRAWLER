@@ -4,7 +4,7 @@ import java.util.logging.Level;
 
 import util.Cheat;
 
-public abstract class AbstractHandler implements Runnable {
+public abstract class AbstractHandler implements Handler {
 	
 	public AbstractHandler() {
 		

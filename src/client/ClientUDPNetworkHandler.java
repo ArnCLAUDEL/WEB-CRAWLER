@@ -1,27 +1,28 @@
 package client;
 
 import java.io.IOException;
+import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
-import java.nio.channels.SocketChannel;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 
-import io.AbstractTCPNetworkHandler;
+import io.AbstractUDPNetworkHandler;
 import util.Cheat;
 import util.SerializerBuffer;
 
-public class ClientNetworkHandler extends AbstractTCPNetworkHandler implements NetworkWriter {
-	
-	private final ClientMessageHandler messageHandler;
-	private final ExecutorService executor = Executors.newSingleThreadExecutor();
+public class ClientUDPNetworkHandler extends AbstractUDPNetworkHandler {
 
-	private SocketChannel channel;
+	private final ClientMessageHandler messageHandler;
+	private ExecutorService executor;
 	
-	public ClientNetworkHandler(SocketChannel channel, Client client) throws IOException {
+	private DatagramChannel channel;
+	
+	public ClientUDPNetworkHandler(DatagramChannel channel, int op, Client client) throws IOException {
 		super(channel, SelectionKey.OP_READ, client);
 		this.messageHandler = new ClientMessageHandler(getSerializerBuffer(channel), client);
 		this.channel = channel;
+		this.executor = Executors.newSingleThreadExecutor();
 		executor.execute(messageHandler);
 	}	
 	

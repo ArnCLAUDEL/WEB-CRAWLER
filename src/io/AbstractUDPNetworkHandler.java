@@ -14,22 +14,33 @@ import util.SerializerBuffer;
 public abstract class AbstractUDPNetworkHandler extends AbstractNetworkHandler {
 
 	private final Map<SocketAddress, SerializerBuffer> buffers;
+	private final DatagramChannel channel;
 	
 	public AbstractUDPNetworkHandler(DatagramChannel channel, int op, IOEntity ioEntity) throws IOException {
 		super(channel, op, ioEntity);
+		this.channel = channel;
 		this.buffers = new HashMap<>();
 	}
 	
 	private boolean checkRegistery(SocketAddress address) {
 		if(address == null)
 			return false;
-		if(!buffers.containsKey(address))
-			buffers.put(address, new SerializerBuffer());
+		if(!buffers.containsKey(address)) {
+			SerializerBuffer serializerBuffer = new SerializerBuffer();
+			buffers.put(address, serializerBuffer);
+			register(address, serializerBuffer);
+		}
 		return true;
 	}
 	
+	protected void register(SocketAddress address, SerializerBuffer serializerBuffer) {}
+	
 	protected SerializerBuffer getSerializerBuffer(SocketAddress address) {
 		return buffers.get(address);
+	}
+	
+	protected int send(SocketAddress address, SerializerBuffer serializerBuffer) throws IOException {
+		return serializerBuffer.send(channel, address);
 	}
 
 	@Override
