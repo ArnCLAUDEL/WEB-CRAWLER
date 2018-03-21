@@ -143,7 +143,7 @@ public class SerializerBuffer {
 		tryFlowException(() -> buffer.put(value));
 		return this;
 	}
-
+	
 	public SerializerBuffer putChar(char value) {
 		tryFlowException(() -> buffer.putChar(value));
 		return this;
