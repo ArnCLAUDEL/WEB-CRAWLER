@@ -18,7 +18,7 @@ public class Explorer {
 	private final String hostname;
 	private final Map<String, STATE> links;
 	
-	public Explorer(Server server, String hostname) {
+	public Explorer(Server server, String hostname,String link) {
 		this.server = server;
 		this.hostname = hostname;
 		this.links = new HashMap<>();
