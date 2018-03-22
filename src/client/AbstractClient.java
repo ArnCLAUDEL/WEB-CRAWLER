@@ -1,5 +1,6 @@
 package client;
 
+import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -19,6 +20,7 @@ import protocol.Request;
 import protocol.StartService;
 import protocol.StopService;
 import util.Cheat;
+import util.SerializerBuffer;
 
 public abstract class AbstractClient extends AbstractIOEntity implements Client {
 	protected final String hostname;
@@ -28,6 +30,7 @@ public abstract class AbstractClient extends AbstractIOEntity implements Client 
 	protected long id;
 	protected boolean connected;
 	protected ClientProtocolHandler protocolHandler;
+	protected ClientNetworkHandler networkHandler;
 	
 	public AbstractClient(String hostname, int port, long previousId) {
 		super("Client " + Cheat.getId());
@@ -131,6 +134,11 @@ public abstract class AbstractClient extends AbstractIOEntity implements Client 
 		}).whenComplete((v,e) -> {
 			Cheat.LOGGER.log(Level.WARNING, e.getMessage(), e);
 		});
+	}
+	
+	@Override
+	public int write(SerializerBuffer serializerBuffer) throws IOException {
+		return networkHandler.write(serializerBuffer);
 	}
 	
 	@Override

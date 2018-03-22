@@ -2,20 +2,20 @@ package client;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.DatagramChannel;
 
 import client.state.InitClientProtocolHandler;
 import process.ProcessExecutor;
 import protocol.Init;
 
-public abstract class AbstractTCPClient extends AbstractClient {
+public abstract class AbstractUDPClient extends AbstractClient {
 
-	protected SocketChannel channel;
+	protected DatagramChannel channel;
 	
-	public AbstractTCPClient(String hostname, int port, long previousId) {
+	public AbstractUDPClient(String hostname, int port, long previousId) {
 		super(hostname, port, previousId);
 	}
-	
+
 	@Override
 	protected void start() throws IOException {
 		connect(hostname, port);
@@ -25,14 +25,16 @@ public abstract class AbstractTCPClient extends AbstractClient {
 	}
 	
 	private void startHandlers() throws IOException {
-		this.networkHandler = new ClientTCPNetworkHandler(channel, this);
+		this.networkHandler = new ClientUDPNetworkHandler(channel, this);
 		addHandler(networkHandler);
 	}
 	
 	@Override
 	public void connect(String hostname, int port) throws IOException {
-		this.channel = SocketChannel.open(new InetSocketAddress(hostname, port));
+		this.channel = DatagramChannel.open(); 
+		this.channel.bind(null);
+		this.channel.connect(new InetSocketAddress(hostname, port));
 		this.connected = true;
 	}
-
+	
 }

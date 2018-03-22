@@ -21,7 +21,7 @@ public class ServerUDPNetworkHandler extends AbstractUDPNetworkHandler implement
 	private final BiMap<ClientIdentifier, SocketAddress> clientsAddresses;
 	private final Server server;
 	
-	public ServerUDPNetworkHandler(DatagramChannel channel, int op, Server server) throws IOException {
+	public ServerUDPNetworkHandler(DatagramChannel channel, Server server) throws IOException {
 		super(channel, SelectionKey.OP_READ, server);
 		this.server = server;
 		this.executor = Executors.newCachedThreadPool();
@@ -55,8 +55,8 @@ public class ServerUDPNetworkHandler extends AbstractUDPNetworkHandler implement
 		SocketAddress address = clientsAddresses.getLeft(clientId);
 		if(address == null)
 			return -1;
-		
-		return send(address, serializerBuffer);
+		int nb = send(address, serializerBuffer);
+		return nb;
 	}
 	
 	@Override

@@ -27,7 +27,7 @@ public class ServerMessageHandler extends AbstractMessageHandler {
 		this.clientId = clientId;
 	}
 	
-	protected void handleProtocol() {
+	protected void handle() {
 		synchronized (serializerBuffer) {
 			byte flag = serializerBuffer.get();
 				

@@ -11,7 +11,7 @@ import io.AbstractTCPNetworkHandler;
 import util.Cheat;
 import util.SerializerBuffer;
 
-public class ClientTCPNetworkHandler extends AbstractTCPNetworkHandler implements NetworkWriter {
+public class ClientTCPNetworkHandler extends AbstractTCPNetworkHandler implements ClientNetworkHandler {
 	
 	private final ClientMessageHandler messageHandler;
 	private final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -25,10 +25,11 @@ public class ClientTCPNetworkHandler extends AbstractTCPNetworkHandler implement
 		executor.execute(messageHandler);
 	}	
 	
+	@Override
 	public int write(SerializerBuffer serializerBuffer) throws IOException {
 		if(channel == null)
 			throw new NullPointerException("Excepting a non-null SocketChannel.");
-		return serializerBuffer.write(channel);
+		return write(channel, serializerBuffer);
 	}
 	
 	@Override

@@ -33,7 +33,9 @@ public abstract class AbstractUDPNetworkHandler extends AbstractNetworkHandler {
 		return true;
 	}
 	
-	protected void register(SocketAddress address, SerializerBuffer serializerBuffer) {}
+	protected void register(SocketAddress address, SerializerBuffer serializerBuffer) {
+		this.buffers.put(address, serializerBuffer);
+	}
 	
 	protected SerializerBuffer getSerializerBuffer(SocketAddress address) {
 		return buffers.get(address);
@@ -50,7 +52,7 @@ public abstract class AbstractUDPNetworkHandler extends AbstractNetworkHandler {
 		try {
 			serializerBuffer.clear();
 			SocketAddress addressFrom = serializerBuffer.receive(channel);
-			if(checkRegistery(addressFrom))
+			if(!checkRegistery(addressFrom))
 				return;
 			serializerBuffer.flip();
 			SerializerBuffer peerSerializerBuffer = getSerializerBuffer(addressFrom);

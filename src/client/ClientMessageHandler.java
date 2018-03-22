@@ -23,9 +23,10 @@ public class ClientMessageHandler extends AbstractMessageHandler {
 	}
 
 	@Override
-	protected void handleProtocol() {
+	protected void handle() {
 		synchronized (serializerBuffer) {
 			byte flag = serializerBuffer.get();
+			
 			switch(flag) {
 				case Flag.OK: handleOk(); break;
 				case Flag.REQUEST: handleRequest(); break;

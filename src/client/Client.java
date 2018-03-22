@@ -7,7 +7,7 @@ import io.IOEntity;
 import client.NetworkWriter;
 
 public interface Client extends IOEntity, ClientProtocolHandler, NetworkWriter {
-	SocketChannel connect(String hostname, int port) throws IOException;
+	void connect(String hostname, int port) throws IOException;
 	void scan (String hostname);
 	void setProtocolHandler(ClientProtocolHandler protocolHandler);
 	int getNbProcessUnits();

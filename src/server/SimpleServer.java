@@ -4,7 +4,7 @@ import java.util.logging.Level;
 
 import util.Cheat;
 
-public class SimpleServer extends AbstractTCPServer {
+public class SimpleServer extends AbstractUDPServer {
 	
 	public SimpleServer(int port) {
 		super(port);
@@ -23,6 +23,5 @@ public class SimpleServer extends AbstractTCPServer {
 		catch (InterruptedException e) {}
 		finally {System.exit(0);}
 	}
-
 	
 }

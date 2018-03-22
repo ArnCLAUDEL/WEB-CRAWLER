@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 
 public class SerializerBuffer {
-	private static final int BUFFER_SIZE = 512;
+	private static final int BUFFER_SIZE = 2048;
 	
 	private final ByteBuffer buffer;
 	
@@ -212,9 +212,6 @@ public class SerializerBuffer {
 	
 	@Override
 	public String toString() {
-		buffer.mark();
-		String res = Cheat.CHARSET.decode(buffer).toString();
-		buffer.reset();
-		return res;
+		return "SerializerBuffer: " + buffer;
 	}
 }

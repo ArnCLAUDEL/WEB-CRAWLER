@@ -29,7 +29,7 @@ public class AbstractProtocolHandler {
 	}
 	
 	protected void schedule(TimerTask task, long firstTime, long period) {
-		new Timer().scheduleAtFixedRate(task, firstTime, period);
+		//new Timer().scheduleAtFixedRate(task, firstTime, period);
 	}
 	
 }

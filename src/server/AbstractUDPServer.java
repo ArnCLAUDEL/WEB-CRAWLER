@@ -1,30 +1,29 @@
 package server;
 
 import java.io.IOException;
-import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.DatagramChannel;
 
 import server.state.ActiveServerProtocolHandler;
 
-public abstract class AbstractTCPServer extends AbstractServer {
+public abstract class AbstractUDPServer extends AbstractServer {
 
-	private ServerSocketChannel serverSocket;
+	private DatagramChannel channel;
 	
-	public AbstractTCPServer(int port) {
+	public AbstractUDPServer(int port) {
 		super(port);
-		
 	}
 	
 	@Override
 	protected void start() throws IOException {
-		serverSocket = ServerSocketChannel.open();
-		serverSocket.bind(address);
+		channel = DatagramChannel.open();
+		channel.bind(address);
 		active = true;
 		startHandlers();
 		this.protocolHandler = new ActiveServerProtocolHandler(this);
 	}
 	
 	private void startHandlers() throws IOException {
-		this.networkHandler = new ServerTCPNetworkHandler(serverSocket, this);
+		this.networkHandler = new ServerUDPNetworkHandler(channel, this);
 		addHandler(networkHandler);
 		addHandler(new ServerKeyboardHandler(this));
 	}

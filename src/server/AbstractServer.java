@@ -37,7 +37,7 @@ public abstract class AbstractServer extends AbstractIOEntity implements Server 
 	
 	public AbstractServer(int port) {
 		super("Server " + Cheat.getId());
-		this.address = new InetSocketAddress(port);
+		this.address = new InetSocketAddress("localhost", port);
 		
 		this.clients = new TreeSet<>();
 		this.activeClients = new TreeSet<>();
