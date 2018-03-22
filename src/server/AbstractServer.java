@@ -61,6 +61,7 @@ public abstract class AbstractServer extends AbstractIOEntity implements Server 
 	@Override
 	protected void start() throws IOException {}
 	
+	@Override
 	public boolean handleInit(ClientIdentifier clientId, Init init) {
 		Cheat.LOGGER.log(Level.FINER, "Handling " + init + "..");
 		boolean res = protocolHandler.handleInit(clientId, init);
@@ -71,36 +72,43 @@ public abstract class AbstractServer extends AbstractIOEntity implements Server 
 		return res;
 	}
 
+	@Override
 	public void handleStartService(ClientIdentifier clientId, StartService startService) {
 		Cheat.LOGGER.log(Level.FINER, "Handling " + startService + "..");
 		protocolHandler.handleStartService(clientId, startService);
 	}
 
+	@Override
 	public void handleStopService(ClientIdentifier clientId, StopService stopService) {
 		Cheat.LOGGER.log(Level.FINER, "Handling " + stopService + "..");
 		protocolHandler.handleStopService(clientId, stopService);
 	}
 
+	@Override
 	public void handleReply(ClientIdentifier clientId, Reply reply) {
 		Cheat.LOGGER.log(Level.FINER, "Handling " + reply + "..");
 		protocolHandler.handleReply(clientId, reply);
 	}
 	
+	@Override
 	public void processReply(Reply reply) {
 		Cheat.LOGGER.log(Level.FINER, "Processing " + reply + "..");
 		explorer.processReply(reply);
 	}
 
+	@Override
 	public void handleForget(ClientIdentifier clientId, Forget forget) {
 		Cheat.LOGGER.log(Level.FINER, "Handling " + forget + "..");
 		protocolHandler.handleForget(clientId, forget);
 	}
 
+	@Override
 	public void handleDecline(ClientIdentifier clientId, Decline decline) {
 		Cheat.LOGGER.log(Level.FINER, "Handling " + decline + "..");
 		protocolHandler.handleDecline(clientId, decline);
 	}
 
+	@Override
 	public void sendOk(ClientIdentifier clientId, Ok ok) {
 		Cheat.LOGGER.log(Level.FINER, "Sending " + ok + "..");
 		protocolHandler.sendOk(clientId, ok);
@@ -111,6 +119,7 @@ public abstract class AbstractServer extends AbstractIOEntity implements Server 
 		protocolHandler.sendAbort(clientId, abort);
 	}
 
+	@Override
 	public void sendRequest(ClientIdentifier clientId, Request request) {
 		Cheat.LOGGER.log(Level.FINER, "Sending " + request + "..");
 		protocolHandler.sendRequest(clientId, request);
