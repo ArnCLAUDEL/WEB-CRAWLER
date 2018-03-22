@@ -2,7 +2,6 @@ package process;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Scanner;
@@ -12,8 +11,6 @@ import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.net.ssl.HttpsURLConnection;
 
 import util.Cheat;
 

@@ -1,7 +1,6 @@
 package client;
 
 import java.io.IOException;
-import java.net.SocketAddress;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.util.concurrent.ExecutorService;
