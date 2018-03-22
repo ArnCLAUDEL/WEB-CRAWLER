@@ -5,7 +5,7 @@ import java.util.logging.Level;
 
 import util.Cheat;
 
-public class SimpleClient extends AbstractUDPClient {
+public class SimpleClient extends AbstractTCPClient {
 
 	public SimpleClient(String hostname, int port, long previousId) {
 		super(hostname, port, previousId);
