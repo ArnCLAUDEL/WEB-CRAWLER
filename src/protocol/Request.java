@@ -28,7 +28,8 @@ public class Request extends Message {
 		return hostname;
 	}
 	
-	public Link parse(String completPath) {
+	public Link parse(String completPath){
+		System.out.println(completPath);
 		String hostname = completPath.substring(0, completPath.indexOf("/"));
 		String path = completPath.substring(completPath.indexOf("/"),completPath.length() );
 		return new Link(hostname,path);
