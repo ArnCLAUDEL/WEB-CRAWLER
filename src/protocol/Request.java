@@ -2,6 +2,7 @@ package protocol;
 
 import io.Creator;
 import io.SerializerBuffer;
+import server.Link;
 
 public class Request extends Message {
 	public static final Creator<Request> CREATOR = Request::new;
@@ -9,18 +10,28 @@ public class Request extends Message {
 	private String hostname;
 	private String link;
 	
-	public Request(String hostname,String link) {
+	public Request(String completPath) {
 		super(Flag.REQUEST);
-		this.hostname = hostname;
-		this.link=link;
+		
+		Link link = parse(completPath);
+
+		System.out.println(completPath);
+		this.hostname = link.getHostname();
+		this.link= link.getLink();
 	}
-	
+
 	public Request() {
-		this("www.example.com","");
+		this("example.com/");
 	}
 	
 	public String getHostname() {
 		return hostname;
+	}
+	
+	public Link parse(String completPath) {
+		String hostname = completPath.substring(0, completPath.indexOf("/"));
+		String path = completPath.substring(completPath.indexOf("/"),completPath.length() );
+		return new Link(hostname,path);
 	}
 	
 	public String getLink() {

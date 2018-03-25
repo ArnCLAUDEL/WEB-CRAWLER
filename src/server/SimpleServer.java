@@ -57,7 +57,7 @@ public class SimpleServer extends AbstractServer {
 	public void scan(String hostname,String link) {
 		Cheat.LOGGER.log(Level.INFO, "Preparing request.");
 		
-		explorer = new Explorer(this, Cheat.ONISEP_URL,link);
+		explorer = new Explorer(this, hostname,link);
 		explorer.sendRequests();
 		/*
 		Request request = new Request("https://en.wiktionary.org/wiki/Captain_Obvious");

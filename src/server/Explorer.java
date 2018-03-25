@@ -12,23 +12,27 @@ import protocol.Request;
 import util.Cheat;
 
 public class Explorer {
+	
+	
 	public static enum STATE { NOT_EXPLORED, EXPLORING, EXPLORED };
 	
 	private final Server server;
 	private final String hostname;
 	private final Map<String, STATE> links;
 	
-	public Explorer(Server server, String hostname,String link) {
+	public Explorer(Server server, String hostname,String path) {
+		System.out.println("RECU");
 		this.server = server;
-		this.hostname = hostname;
+		this.hostname= hostname;
 		this.links = new HashMap<>();
-		this.links.put(hostname, STATE.NOT_EXPLORED);
+		this.links.put(path, STATE.NOT_EXPLORED);
 	}
 	
 	public synchronized void processReply(Reply reply) {
 		Cheat.LOGGER.log(Level.FINER, "Processing reply.");
 		links.put(reply.getHostname(), STATE.EXPLORED);
 		reply	.getUrls().stream()
+				.map(url->"/".concat(url))
 				.filter(url -> links.getOrDefault(url, STATE.NOT_EXPLORED) == STATE.NOT_EXPLORED)
 				.forEach(url -> links.put(url, STATE.NOT_EXPLORED));
 		sendRequests();
@@ -45,10 +49,11 @@ public class Explorer {
 	}
 	
 	public synchronized void sendRequests() {
-		Cheat.LOGGER.log(Level.FINER, "Preparing requests.");
+		Cheat.LOGGER.log(Level.INFO, "Preparing requests.");
 		links	.entrySet().stream()
 				.filter((e) -> e.getValue() == STATE.NOT_EXPLORED)
 				.map(Map.Entry::getKey)
+				.map(key->hostname.concat("|"+key))
 				.map(Request::new)
 				.collect(Collectors.groupingBy(server::sendRequest))
 				.getOrDefault(Boolean.TRUE, new ArrayList<>())

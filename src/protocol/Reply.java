@@ -5,6 +5,7 @@ import java.util.Set;
 
 import io.Creator;
 import io.SerializerBuffer;
+import server.Link;
 
 public class Reply extends Message {
 	public static final Creator<Reply> CREATOR = Reply::new;
