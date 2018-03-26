@@ -19,8 +19,7 @@ public class ServerKeyboardHandler extends AbstractKeyboardHandler {
 	protected void handle(SerializerBuffer serializerBuffer) throws IOException {
 		String hostname = Cheat.CHARSET.decode(serializerBuffer.getBuffer()).toString();
 		
-		
-		server.scan(hostname,"");
+		server.scan(hostname);
 	}
 	
 	@Override

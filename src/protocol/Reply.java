@@ -14,20 +14,26 @@ public class Reply extends Message {
 	private Request request;
 	
 	private String hostname;
+	private String link;
 	private Set<String> urls;
 	
 	private Reply() {
 		super(Flag.REPLY);
 	}
 	
-	public Reply(String hostname, Set<String> urls) {
+	public Reply(String hostname, String link, Set<String> urls) {
 		this();
 		this.hostname = hostname;
+		this.link = link;
 		this.urls = urls;
 	}
 	
 	public String getHostname() {
 		return hostname;
+	}
+
+	public String getLink() {
+		return link;
 	}
 	
 	public Set<String> getUrls() {
@@ -37,6 +43,7 @@ public class Reply extends Message {
 	@Override
 	public void writeToBuff(SerializerBuffer ms) {
 		ms.putString(hostname);
+		ms.putString(link);
 		ms.putInt(urls != null ? urls.size() : 0);
 		urls.stream().forEach(ms::putString);
 	}
@@ -44,6 +51,7 @@ public class Reply extends Message {
 	@Override
 	public void readFromBuff(SerializerBuffer ms) {
 		this.hostname = ms.getString();
+		this.link =ms.getString();
 		int size = ms.getInt();
 		this.urls = new HashSet<>();
 		for(int i = 0; i < size; i++) {

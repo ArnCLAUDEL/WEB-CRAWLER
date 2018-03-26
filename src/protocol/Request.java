@@ -10,29 +10,18 @@ public class Request extends Message {
 	private String hostname;
 	private String link;
 	
-	public Request(String completPath) {
-		super(Flag.REQUEST);
-		
-		Link link = parse(completPath);
-
-		System.out.println(completPath);
-		this.hostname = link.getHostname();
-		this.link= link.getLink();
+	public Request(String hostname, String path) {
+		this();
+		this.hostname = hostname;
+		this.link= path;
 	}
 
-	public Request() {
-		this("example.com/");
+	private Request() {
+		super(Flag.REQUEST);
 	}
 	
 	public String getHostname() {
 		return hostname;
-	}
-	
-	public Link parse(String completPath){
-		System.out.println(completPath);
-		String hostname = completPath.substring(0, completPath.indexOf("/"));
-		String path = completPath.substring(completPath.indexOf("/"),completPath.length() );
-		return new Link(hostname,path);
 	}
 	
 	public String getLink() {
@@ -42,11 +31,13 @@ public class Request extends Message {
 	@Override
 	public void writeToBuff(SerializerBuffer ms) {
 		ms.putString(hostname);
+		ms.putString(link);
 	}
 
 	@Override
 	public void readFromBuff(SerializerBuffer ms) {
 		this.hostname = ms.getString();
+		this.link=ms.getString();
 	}
 
 	@Override

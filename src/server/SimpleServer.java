@@ -54,10 +54,11 @@ public class SimpleServer extends AbstractServer {
 	}
 	
 	@Override
-	public void scan(String hostname,String link) {
+	public void scan(String hostname) {
 		Cheat.LOGGER.log(Level.INFO, "Preparing request.");
-		
-		explorer = new Explorer(this, hostname,link);
+		if(hostname.contains("\n"))
+			hostname=hostname.replaceAll("\n", "");
+		explorer = new Explorer(this, hostname);
 		explorer.sendRequests();
 		/*
 		Request request = new Request("https://en.wiktionary.org/wiki/Captain_Obvious");

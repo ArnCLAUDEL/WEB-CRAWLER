@@ -70,7 +70,7 @@ public class SimpleClient extends AbstractIOEntity implements Client {
 			}
 			return null;
 		}).thenAccept(urls -> {
-			Reply reply = new Reply(hostname,urls);
+			Reply reply = new Reply(hostname,link,urls);
 			sendReply(reply);
 		}).whenComplete((v,e) -> {
 			Cheat.LOGGER.log(Level.WARNING, e.getMessage(), e);

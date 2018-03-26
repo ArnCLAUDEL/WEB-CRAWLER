@@ -150,7 +150,6 @@ public class ProcessUnit implements Callable<Set<String>>{
 	public String format(String s) {
 		s=s.replaceAll(AMP_ESCAPED, AMP_ESCAPED_REPLACEMENT);
 		s=s.replaceAll(ACHOR_ESCAPED, AMP_ESCAPED_REPLACEMENT);
-		s=s.replaceAll("/", AMP_ESCAPED_REPLACEMENT);
 		return s;
 	}
 
