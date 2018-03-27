@@ -3,6 +3,7 @@ package client;
 import java.io.IOException;
 
 import io.IOEntity;
+import protocol.Message;
 
 /**
  * {@code Client} interface represents a client that is able to handle protocol
@@ -34,7 +35,7 @@ public interface Client extends IOEntity, ClientProtocolHandler, NetworkWriter {
 	 * Retrieves various informations such as other links, frequent words or pictures.
 	 * @param link The link of the web page to scan.
 	 */
-	void scan (String link);
+	void scan (String hostname, String link);
 	
 	/**
 	 * Sets the new protocol handler.<br />

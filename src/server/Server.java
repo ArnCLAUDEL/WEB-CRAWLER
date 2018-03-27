@@ -1,6 +1,7 @@
 package server;
 
 import io.IOEntity;
+import protocol.Message;
 import protocol.Reply;
 import protocol.Request;
 

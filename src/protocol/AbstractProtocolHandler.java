@@ -1,5 +1,6 @@
 package protocol;
 
+import java.util.Timer;
 import java.util.TimerTask;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -67,7 +68,7 @@ public class AbstractProtocolHandler {
 	 * @param period The period to use
 	 */
 	protected void schedule(TimerTask task, long firstTime, long period) {
-		//new Timer().scheduleAtFixedRate(task, firstTime, period);
+		new Timer().scheduleAtFixedRate(task, firstTime, period);
 	}
 	
 }

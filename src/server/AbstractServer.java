@@ -179,8 +179,9 @@ public abstract class AbstractServer extends AbstractIOEntity implements Server 
 	@Override
 	public void scan(String hostname) {
 		Cheat.LOGGER.log(Level.INFO, "Preparing request.");
-		
-		explorer = new Explorer(this, Cheat.ONISEP_URL);
+		if(hostname.contains("\n"))
+			hostname=hostname.replaceAll("\n", "");
+		explorer = new Explorer(this, hostname);
 		explorer.sendRequests();
 		/*
 		Request request = new Request("https://en.wiktionary.org/wiki/Captain_Obvious");

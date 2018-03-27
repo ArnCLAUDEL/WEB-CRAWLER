@@ -124,8 +124,8 @@ public abstract class AbstractClient extends AbstractIOEntity implements Client 
 	}
 	
 	@Override
-	public void scan(String hostname) {
-		Future<Set<String>> future = executor.scan(hostname);
+	public void scan(String hostname, String link) {
+		Future<Set<String>> future = executor.scan(hostname, link);
 		CompletableFuture.supplyAsync(() -> {
 			try {
 				return future.get();
@@ -134,7 +134,7 @@ public abstract class AbstractClient extends AbstractIOEntity implements Client 
 			}
 			return null;
 		}).thenAccept(urls -> {
-			Reply reply = new Reply(hostname, urls);
+			Reply reply = new Reply(hostname, link, urls);
 			sendReply(reply);
 		}).whenComplete((v,e) -> {
 			Cheat.LOGGER.log(Level.WARNING, e.getMessage(), e);

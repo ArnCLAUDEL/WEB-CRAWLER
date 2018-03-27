@@ -50,11 +50,11 @@ public class ProcessExecutor implements Executor {
 		
 		List<Future<Set<String>>> futureResults = new ArrayList<>();
 		
-		Future<Set<String>> futureResult = executor.submit(new ProcessUnit("https://en.wiktionary.org/wiki/Captain_Obvious"));
+		Future<Set<String>> futureResult = executor.submit(new ProcessUnit("https://en.wiktionary.org","/wiki/Captain_Obvious"));
 		for(int i = 0; i < 200; i++) {
 			try {Thread.sleep(100);}
 			catch(InterruptedException e) {}
-			futureResult = executor.submit(new ProcessUnit("https://en.wiktionary.org/wiki/"+i));
+			futureResult = executor.submit(new ProcessUnit("https://en.wiktionary.org/wiki",""+i));
 			futureResults.add(futureResult);
 		}
 		
@@ -102,8 +102,8 @@ public class ProcessExecutor implements Executor {
 		return task;
 	}
 	
-	public Future<Set<String>> scan(String hostname) {
-		return submit(new ProcessUnit(hostname));
+	public Future<Set<String>> scan(String hostname,String link) {
+		return submit(new ProcessUnit(hostname,link));
 	}
 	
 }

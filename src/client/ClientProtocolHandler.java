@@ -4,6 +4,7 @@ import protocol.Abort;
 import protocol.Decline;
 import protocol.Forget;
 import protocol.Init;
+import protocol.Message;
 import protocol.Ok;
 import protocol.Reply;
 import protocol.Request;

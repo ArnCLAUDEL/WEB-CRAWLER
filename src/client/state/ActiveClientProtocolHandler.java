@@ -41,7 +41,7 @@ public class ActiveClientProtocolHandler extends AbstractClientProtocolHandler {
 	
 	@Override
 	public void handleRequest(Request request) {
-		client.scan(request.getHostname());	
+		client.scan(request.getHostname(),request.getLink());	
 	}
 	
 	@Override
