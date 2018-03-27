@@ -22,6 +22,11 @@ import protocol.StopService;
 import util.Cheat;
 import util.SerializerBuffer;
 
+/**
+ * {@code AbstractClient} is a base implementation of a {@link Client}.<br />
+ * This implementation provides a {@link ClientProtocolHandler} but <b>not</b>
+ * a {@link ClientNetworkHandler}. This has to be manually set. 
+ */
 public abstract class AbstractClient extends AbstractIOEntity implements Client {
 	protected final String hostname;
 	protected final ProcessExecutor executor;
