@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -19,6 +20,7 @@ public class Explorer {
 	private final Server server;
 	private final String hostname;
 	private final Map<String, STATE> links;
+	private Map<String,Set<String>> keyWords;
 	
 	public Explorer(Server server, String hostname) {
 		this.server = server;

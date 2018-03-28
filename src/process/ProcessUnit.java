@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import HtmlParser.HtmlParser;
 import HttpRequest.HttpGet;
 import util.Cheat;
 import util.SerializerBuffer;
@@ -19,7 +20,10 @@ public class ProcessUnit implements Callable<Set<String>>{
 	
 	
 	private Set<String> links;
+	private Set<String> keyWords;
 	private final SerializerBuffer sb = new SerializerBuffer() ;
+	private final StringBuilder sbpage = new StringBuilder();
+	
 	private final static Pattern patternCode = Pattern.compile("[0-9]{3}");
 	private final static Pattern patternLoc = Pattern.compile("Location: (https?)://(.*)");
 	private final static String AMP_ESCAPED = "&amp;";
@@ -30,13 +34,14 @@ public class ProcessUnit implements Callable<Set<String>>{
 	private String relativLink;
 	private SocketChannel s;
 	private int code = 0;
-	private boolean doparse=false;
-	
+	private boolean doparse=false;	
 	
 	public ProcessUnit(String hostname , String relativLink) {
 		this.hostname = hostname;
 		this.relativLink = relativLink;
 		this.links = new TreeSet<>();
+		this.keyWords = new TreeSet<>();
+
 	}
 	
 	@Override
@@ -46,20 +51,24 @@ public class ProcessUnit implements Callable<Set<String>>{
 			Cheat.LOGGER.log(Level.INFO, "Generate Socket"); generateRequest();
 			Cheat.LOGGER.log(Level.INFO, "Read on Socket And GET REP"); socketRead();
 		}while(canRedirect());
-		if(doparse)
-			Cheat.LOGGER.log(Level.INFO, "Parse all links in page"); links.addAll(parse());
+		if(doparse) {
+			Cheat.LOGGER.log(Level.INFO, "Parse all links in page"); links.addAll(parseLink());
+			Cheat.LOGGER.log(Level.INFO, "Parse all key words in page"); keyWords.addAll(parseKeyWord());
+			}
 		return links;
 	}
 	
 	
-	private Set<String> parse() throws IOException {
+	private Set<String> parseLink() throws IOException {
 		String HREF_REGEX = "href=\"(http://"+hostname+")?/([^\"]*)";
 		Pattern pattern = Pattern.compile(HREF_REGEX);
 		Scanner scanner = new Scanner(s.socket().getInputStream());
 		Matcher m;
 		String line,urlMatched;
+		
 		while(scanner.hasNextLine()) {
 			line= scanner.nextLine();
+			sbpage.append(line);
 			m = pattern.matcher(line);
 			while(m.find()) {
 				urlMatched = format(m.group(2));
@@ -68,9 +77,14 @@ public class ProcessUnit implements Callable<Set<String>>{
 			}
 		}
 		scanner.close();
+		
 		return links;
 	}
 
+	private Set<String> parseKeyWord(){
+		return new HtmlParser(sbpage.toString()).getAllKeyWord();
+	}
+	
 	private void createSocket() throws IOException {
 		s = SocketChannel.open(new InetSocketAddress(hostname, 80));
 	}
@@ -86,6 +100,7 @@ public class ProcessUnit implements Callable<Set<String>>{
 	}
 	
 	private boolean canRedirect() {
+		System.out.println(code);
 		switch(code) {
 		case 200:
 			doparse =true;
@@ -155,7 +170,7 @@ public class ProcessUnit implements Callable<Set<String>>{
 	}
 
 	public static void main(String[] args) throws IOException {
-		ProcessUnit pu = new ProcessUnit("www.onisep.fr","/");
+		ProcessUnit pu = new ProcessUnit("www.onisep.fr","");
 		Cheat.LOGGER.log(Level.INFO, "Send create Socket");
 		do {
 			Cheat.LOGGER.log(Level.INFO, "Send create Socket"); pu.createSocket();
@@ -163,9 +178,11 @@ public class ProcessUnit implements Callable<Set<String>>{
 			Cheat.LOGGER.log(Level.INFO, "Read on Socket And GET REP"); pu.socketRead();
 		}while(pu.canRedirect());
 		if(pu.doparse) {
-			Cheat.LOGGER.log(Level.INFO, "Parse all links in page"); pu.links.addAll(pu.parse());}
+			Cheat.LOGGER.log(Level.INFO, "Parse all links in page"); pu.links.addAll(pu.parseLink());
+			Cheat.LOGGER.log(Level.INFO, "Parse all key words in page");pu.keyWords.addAll(pu.parseKeyWord());}
 			
 		System.out.println(pu.links);
+		System.out.println(pu.keyWords);
 	}
 	
 }

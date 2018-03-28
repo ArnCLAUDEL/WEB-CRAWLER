@@ -15,6 +15,7 @@ public class Reply extends Message {
 	private String hostname;
 	private String link;
 	private Set<String> urls;
+	private Set<String> keyWords;
 	
 	private Reply() {
 		super(Flag.REPLY);
