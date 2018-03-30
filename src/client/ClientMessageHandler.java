@@ -15,11 +15,11 @@ import util.SerializerBuffer;
 
 public class ClientMessageHandler extends AbstractMessageHandler {
 
-	private final Client client;
+	private final ClientProtocolHandler protocolHandler;
 	
-	public ClientMessageHandler(SerializerBuffer serializerBuffer, Client client) {
+	public ClientMessageHandler(SerializerBuffer serializerBuffer, ClientProtocolHandler protocolHandler) {
 		super(serializerBuffer);
-		this.client = client;
+		this.protocolHandler = protocolHandler;
 	}
 
 	@Override
@@ -45,14 +45,14 @@ public class ClientMessageHandler extends AbstractMessageHandler {
 	}
 	
 	private void handleOk() {
-		handleMessage(serializerBuffer, Ok.CREATOR, client::handleOk);	
+		handleMessage(serializerBuffer, Ok.CREATOR, protocolHandler::handleOk);	
 	}
 	
 	private void handleRequest() {
-		handleMessage(serializerBuffer, Request.CREATOR, client::handleRequest);
+		handleMessage(serializerBuffer, Request.CREATOR, protocolHandler::handleRequest);
 	}
 	
 	private void handleAbort() {
-		handleMessage(serializerBuffer, Abort.CREATOR, client::handleAbort);
+		handleMessage(serializerBuffer, Abort.CREATOR, protocolHandler::handleAbort);
 	}
 }
