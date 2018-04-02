@@ -2,8 +2,8 @@ package server;
 
 import io.IOEntity;
 import protocol.Message;
-import protocol.Reply;
-import protocol.Request;
+import protocol.message.Reply;
+import protocol.message.Request;
 
 /**
  * {@code Server} interface represents a server that is able to handle protocol

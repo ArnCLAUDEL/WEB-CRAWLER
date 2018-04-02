@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import protocol.Reply;
-import protocol.Request;
+import protocol.message.Reply;
+import protocol.message.Request;
 import util.Cheat;
 
 public class Explorer {

@@ -1,15 +1,15 @@
 package client;
 
-import protocol.Abort;
-import protocol.Decline;
-import protocol.Forget;
-import protocol.Init;
 import protocol.Message;
-import protocol.Ok;
-import protocol.Reply;
-import protocol.Request;
-import protocol.StartService;
-import protocol.StopService;
+import protocol.message.Abort;
+import protocol.message.Decline;
+import protocol.message.Forget;
+import protocol.message.Init;
+import protocol.message.Ok;
+import protocol.message.Reply;
+import protocol.message.Request;
+import protocol.message.StartService;
+import protocol.message.StopService;
 
 /**
  * {@code ClientProtocolHandler} interface represents a object
