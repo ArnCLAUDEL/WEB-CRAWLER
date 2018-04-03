@@ -8,9 +8,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
 
+import client.SimpleClient;
 import javafx.scene.transform.Scale;
 
-public class ServerHTML {
+public class ServerHTTP {
 
     public static void main(String[] args){
         try{
@@ -59,11 +60,6 @@ class RequestHandler extends Thread {
             Socket clientSocket = serverSocket.accept();
             System.out.println("Connection made.");
 
-            synchronized(block){
-                System.out.print("Notifying server thread...");
-                block.notify();
-                System.out.println("...done");
-            }
 
             socketReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));            
             socketWriter = new PrintWriter(clientSocket.getOutputStream(), true);
@@ -73,7 +69,9 @@ class RequestHandler extends Thread {
             Scanner scanner = new Scanner(input);
             String site=((scanner.findInLine(patWebSite)).replace("webSite=", "")).replace(" HTTP", "");
             scanner.close();
-            System.out.println(site);
+            String [] args = {site};
+            
+            SimpleServer.main(args);
             
         }catch(IOException e){
             System.out.println("IOException!");
