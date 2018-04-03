@@ -37,7 +37,7 @@ public class CertificationRequest extends AbstractCertificationMessage {
 
 	@Override
 	public void readFromBuff(SerializerBuffer ms) {
-		id = ms.get();
+		id = ms.getLong();
 		certificateRequest = CertificateRequest.CREATOR.init();
 		certificateRequest.readFromBuff(ms);
 	}

@@ -31,16 +31,23 @@ public class ConnectedSessionServerProtocolHandler extends AbstractSessionServer
 	
 	@Override
 	public void handleSessionRequest(SocketAddress from, SessionRequest request) {
-		Future<Certificate> futureCertificate = retriever.getCertificate(request.getCertificateIdentifier());
+		
 		SessionReply reply;
 		try {
-			Certificate certificate = futureCertificate.get();
-			reply = new SessionReply(request.getId(), certificate);
+			Future<Certificate> futureCertificate = retriever.getCertificate(request.getCertificateIdentifier());
+			Certificate clientCertificate = futureCertificate.get();
+			Certificate explorerCertificate = manager.getSession().getCertificate();
+			reply = new SessionReply(request.getId(), explorerCertificate);
 		} catch (NoSuchElementException e) {
 			reply = new SessionReply(request.getId(), e.getMessage());
-		} catch (InterruptedException | ExecutionException e1) {
+		} catch (InterruptedException e1) {
 			Cheat.LOGGER.log(Level.WARNING, "Error while retrieving the certificate", e1);
 			return;
+		} catch (ExecutionException e2) {
+			if(e2.getCause() instanceof NoSuchElementException)
+				reply = new SessionReply(request.getId(), e2.getMessage());
+			else
+				return;
 		}
 		sendSessionReply(from, reply);
 	}

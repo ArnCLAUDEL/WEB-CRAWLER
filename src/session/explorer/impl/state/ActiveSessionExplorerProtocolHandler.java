@@ -26,6 +26,7 @@ public class ActiveSessionExplorerProtocolHandler extends AbstractSessionExplore
 	@Override
 	public void sendSessionStop(SocketAddress to, SessionStop stop) {
 		send(to, stop);
+		explorer.setProtocolHandler(new InactiveSessionExplorerProtocolHandler(networkWriter.get(), explorer, retriever.get(), manager.get()));
 	}
 
 	@Override
@@ -36,7 +37,7 @@ public class ActiveSessionExplorerProtocolHandler extends AbstractSessionExplore
 		Future<Certificate> futureCertificate = retriever.get().getCertificate(init.getCertificateIdentifier());
 		try {
 			Certificate certificate = futureCertificate.get();
-			if(certificate.getType() != Certificate.AGENT || certificate.getId() != init.getId())
+			if(certificate.getType() != Certificate.AGENT || certificate.getId() != init.getCertificateIdentifier().getId())
 				return;
 			
 			SessionInfo info = new SessionInfo(certificate.getId(), certificate);
@@ -52,7 +53,7 @@ public class ActiveSessionExplorerProtocolHandler extends AbstractSessionExplore
 			Cheat.LOGGER.log(Level.WARNING, "Error while retrieving the certificate", e1);
 		}		
 	}
-
+	
 	@Override
 	public void sendSessionAck(SocketAddress to, SessionAck ack) {
 		send(to, ack);

@@ -4,7 +4,7 @@ import io.MySerializable;
 import util.Creator;
 import util.SerializerBuffer;
 
-public class CertificateIdentifier implements MySerializable{
+public class CertificateIdentifier implements MySerializable, Comparable<CertificateIdentifier> {
 	public final static Creator<CertificateIdentifier> CREATOR = CertificateIdentifier::new;
 	
 	private long id;
@@ -25,6 +25,16 @@ public class CertificateIdentifier implements MySerializable{
 		return type;
 	}
 
+	@Override
+	public int hashCode() {
+		return (int) id;
+	}
+	
+	@Override
+	public int compareTo(CertificateIdentifier other) {
+		return (int) (id - other.id);
+	}
+	
 	@Override
 	public void writeToBuff(SerializerBuffer ms) {
 		ms.putLong(id);

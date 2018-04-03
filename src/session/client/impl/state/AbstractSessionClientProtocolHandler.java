@@ -2,19 +2,15 @@ package session.client.impl.state;
 
 import java.net.SocketAddress;
 import java.util.Optional;
-import java.util.concurrent.Future;
 import java.util.logging.Level;
 
 import certification.CertificationRetriever;
 import protocol.AbstractProtocolHandler;
 import protocol.NetworkWriter;
-import session.SessionInfo;
 import session.client.SessionClient;
 import session.client.SessionClientProtocolHandler;
 import session.message.SessionAck;
-import session.message.SessionInit;
 import session.message.SessionReply;
-import session.message.SessionRequest;
 import util.Cheat;
 
 public abstract class AbstractSessionClientProtocolHandler extends AbstractProtocolHandler implements SessionClientProtocolHandler {
@@ -36,19 +32,8 @@ public abstract class AbstractSessionClientProtocolHandler extends AbstractProto
 	}
 
 	@Override
-	public Future<SessionInfo> sendSessionRequest(SocketAddress to, SessionRequest request) {
-		Cheat.LOGGER.log(Level.FINEST, request + " ignored.");
-		return getNotYetConnectedFuture();
-	}
-
-	@Override
 	public void handleSessionReply(SocketAddress from, SessionReply reply) {
 		Cheat.LOGGER.log(Level.FINEST, reply + " ignored.");
-	}
-
-	@Override
-	public void sendSessionInit(SocketAddress to, SessionInit init) {
-		Cheat.LOGGER.log(Level.FINEST, init + " ignored.");
 	}
 
 	@Override

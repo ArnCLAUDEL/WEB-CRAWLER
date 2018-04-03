@@ -1,5 +1,6 @@
 package protocol;
 
+import java.net.SocketAddress;
 import java.nio.BufferUnderflowException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -66,10 +67,10 @@ public abstract class AbstractMessageHandler extends AbstractHandler {
 		};
 	}
 	
-	protected <M extends Message, T> void handleMessage(SerializerBuffer serializerBuffer, Creator<M> messageCreator, T info, BiConsumer<T, M> handler) {
+	protected <M extends Message, T extends SocketAddress> void handleMessage(SerializerBuffer serializerBuffer, Creator<M> messageCreator, T info, BiConsumer<T, M> handler) {
 		M message = messageCreator.init();
 		message.readFromBuff(serializerBuffer);
-		Cheat.LOGGER.log(Level.FINER, message + " received.");
+		Cheat.LOGGER.log(Level.FINER, message + " received from " + info + ".");
 		handler.accept(info, message);
 	}
 	

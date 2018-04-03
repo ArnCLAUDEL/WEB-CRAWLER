@@ -26,24 +26,30 @@ public class SimpleSessionManager implements SessionManager {
 	@Override
 	public synchronized boolean createSession(SessionInfo info) {
 		SessionIdentifier identifier = info.getIdentifier();
-		if(sessions.containsKey(identifier))
-			return false;
-		
-		sessions.put(identifier, info);
-		return true;
+		synchronized (sessions) {
+			if(sessions.containsKey(identifier))
+				return false;
+			
+			sessions.put(identifier, info);
+			return true;
+		}
 	}
 
 	@Override
 	public synchronized void deleteSession(SessionIdentifier identifier) {
-		sessions.remove(identifier);
+		synchronized (sessions) {
+			sessions.remove(identifier);
+		}
 	}
 
 	@Override
 	public SessionInfo getSession(SessionIdentifier identifier) throws NoSuchElementException {
-		if(!sessions.containsKey(identifier))
-			throw new NoSuchElementException("Session not found");
-		
-		return sessions.get(identifier);
+		synchronized (sessions) {
+			if(!sessions.containsKey(identifier))
+				throw new NoSuchElementException("Session not found");
+			
+			return sessions.get(identifier);
+		}
 	}
 
 	@Override

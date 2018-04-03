@@ -112,7 +112,7 @@ public class AbstractProtocolHandler {
 		message.writeToBuff(serializerBuffer);
 		serializerBuffer.flip();
 		if(send(address)) {
-			Cheat.LOGGER.log(Level.FINER, "Message " + message + " sent.");
+			Cheat.LOGGER.log(Level.FINER, "Message " + message + " sent to " + address + ".");
 			return true;
 		}
 		return false;

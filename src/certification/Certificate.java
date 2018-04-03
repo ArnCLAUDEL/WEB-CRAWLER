@@ -1,5 +1,7 @@
 package certification;
 
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.Date;
 
 import io.MySerializable;
@@ -66,6 +68,10 @@ public class Certificate implements MySerializable {
 	
 	public int getPort() {
 		return port;
+	}
+	
+	public SocketAddress getAddress() {
+		return new InetSocketAddress(hostname, port);
 	}
 
 	@Override

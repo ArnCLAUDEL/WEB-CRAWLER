@@ -61,8 +61,10 @@ public class CertificationReply extends AbstractCertificationMessage {
 			Certificate certificate = Certificate.CREATOR.init();
 			certificate.readFromBuff(ms);
 			this.certificate = Optional.of(certificate);
+			this.errorMessage = Optional.empty();
 		} else {
-			errorMessage = Optional.of(ms.getString());
+			this.certificate = Optional.empty();
+			this.errorMessage = Optional.of(ms.getString());
 		}
 	}
 

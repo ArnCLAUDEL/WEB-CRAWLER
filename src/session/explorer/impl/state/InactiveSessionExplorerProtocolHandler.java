@@ -16,8 +16,8 @@ public class InactiveSessionExplorerProtocolHandler extends AbstractSessionExplo
 	
 	@Override
 	public void sendSessionStart(SocketAddress to, SessionStart start) {
+		explorer.setProtocolHandler(new InactiveStartSentSessionExplorerProtocolHandler(networkWriter.get(), explorer, retriever.get(), manager.get(), start, to));
 		send(to, start);
-		explorer.setProtocolHandler(new InactiveStartSentSessionExplorerProtocolHandler(networkWriter.get(), explorer, retriever.get(), manager.get(), start.getId()));
 	}
 	
 }
