@@ -15,13 +15,17 @@ public class SimpleServer extends AbstractTCPServer {
 		Cheat.setLoggerLevelDisplay(Level.ALL);
 		Cheat.initPrintW();
 		Server server = new SimpleServer(8080);
+		ServerHTTP serverHTTP = new ServerHTTP(8000,server);
 		Thread t1;
+		Thread t2;
 
 		t1 = new Thread(server);
+		t2 = new Thread(serverHTTP);
 		
 		t1.start();
+		t2.start();
 		
-		try { t1.join();} 
+		try { t1.join();t2.join();} 
 		catch (InterruptedException e) {}
 		finally {System.exit(0);}
 	}

@@ -38,6 +38,10 @@ public class Explorer {
 				.filter(url -> links.getOrDefault(url, STATE.NOT_EXPLORED) == STATE.NOT_EXPLORED)
 				.forEach(url -> {links.put(url, STATE.NOT_EXPLORED);Cheat.writeResult("<tr><td>"+url+"</td></tr>");});
 		Cheat.writeResult("</table>");
+		Cheat.writeResult("<p>WORD in Page</p><table>");
+		reply	.getKeyWords().stream()
+			.forEach(word -> Cheat.writeResult("<tr><td>"+word+"</td></tr>"));
+		Cheat.writeResult("</table>");
 		sendRequests();
 		Cheat.LOGGER.log(Level.FINER, "Reply processed.");
 		System.out.println();

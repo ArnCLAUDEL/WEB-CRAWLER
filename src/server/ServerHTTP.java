@@ -11,20 +11,20 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.util.Scanner;
 
-public class ServerHTTP {
+public class ServerHTTP implements Runnable{
 	private ServerSocketChannel ssc;
 	private Selector selector;
 	private ByteBuffer bb;
 	private Server server;
 	private String webSite;
 	
-	public ServerHTTP(int p) throws IOException{
+	public ServerHTTP(int p,Server s) throws IOException{
 		ssc =ServerSocketChannel.open();
 		ssc.configureBlocking(false);
 		ssc.bind(new InetSocketAddress(p));
 		selector = Selector.open();
 		bb = ByteBuffer.allocateDirect(512);
-		server = new SimpleServer(8080);
+		server = s;
 		ssc.register(selector, SelectionKey.OP_ACCEPT);	
 	}
 	
@@ -55,7 +55,7 @@ public class ServerHTTP {
         Scanner scanner = new Scanner(cb.toString());
         webSite=((scanner.findInLine("webSite=.* HTTP")).replace("webSite=", "")).replace(" HTTP", "");
         scanner.close();
-        System.out.println(server);
+        server.scan(webSite);
         bb.clear();
 		
 	}
@@ -64,24 +64,34 @@ public class ServerHTTP {
 		return webSite;
 	}
 	
-	void run() throws IOException {
+	@Override
+	public void run() {
 		while(true) {
-			selector.select();
+			try {
+				selector.select();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			for( SelectionKey sk: selector.selectedKeys() ) {
 				if(sk.isAcceptable() ) {
-					accept();
+					try {
+						accept();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}else if( sk.isReadable() ) {
-					repeat(sk);
+					try {
+						repeat(sk);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 			selector.selectedKeys().clear();	
 		}
-		
-	}
-	
-	public static void main(String[] args) throws IOException {
-		ServerHTTP s = new ServerHTTP(8000);
-		s.run();
 		
 	}
 }

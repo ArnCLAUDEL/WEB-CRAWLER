@@ -49,7 +49,8 @@ public class Cheat {
 		
 		pw.println("<html>\n" + 
 				"\n" + 
-				"<head>\n" + 
+				"<head>\n" +
+				"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n" + 
 				"<title>Resultat Exploration</title>\n" + 
 				"</head>\n" + 
 				"\n" + 

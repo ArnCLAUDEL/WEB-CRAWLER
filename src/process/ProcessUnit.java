@@ -53,6 +53,7 @@ public class ProcessUnit implements Callable<ProcessUnitReply>{
 		}while(canRedirect());
 		if(doparse) {
 			Cheat.LOGGER.log(Level.INFO, "Parse all links in page"); links.addAll(parseLink());
+			Cheat.LOGGER.log(Level.INFO, "Parse all words in page"); keyWords.addAll(parseKeyWord());
 			}
 		return new ProcessUnitReply(links, keyWords);
 	}
