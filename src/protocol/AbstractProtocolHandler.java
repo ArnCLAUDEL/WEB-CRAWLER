@@ -1,7 +1,12 @@
 package protocol;
 
+import java.io.IOException;
+import java.net.SocketAddress;
+import java.nio.channels.NotYetConnectedException;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
@@ -34,11 +39,22 @@ public class AbstractProtocolHandler {
 	 */
 	protected final SerializerBuffer serializerBuffer;
 	
+	protected Optional<NetworkWriter> networkWriter;
+	
 	/**
-	 * Creates a new instance with a new dedicated {@link SerializerBuffer}.
+	 * Creates a new instance with a new dedicated {@link SerializerBuffer} and the given {@link NetworkWriter}.
+	 */
+	public AbstractProtocolHandler(NetworkWriter networkWriter) {
+		this.serializerBuffer = new SerializerBuffer();
+		this.networkWriter = Optional.of(networkWriter);
+	}
+	
+	/**
+	 * Creates a new instance with a new dedicated {@link SerializerBuffer} and no {@link NetworkWriter}.
 	 */
 	public AbstractProtocolHandler() {
 		this.serializerBuffer = new SerializerBuffer();
+		this.networkWriter = Optional.empty();
 	}
 	
 	/**
@@ -69,6 +85,43 @@ public class AbstractProtocolHandler {
 	 */
 	protected void schedule(TimerTask task, long firstTime, long period) {
 		new Timer().scheduleAtFixedRate(task, firstTime, period);
+	}
+	
+	private boolean send(SocketAddress address, SerializerBuffer serializerBuffer) throws NotYetConnectedException {
+		NetworkWriter writer = networkWriter.orElseThrow(() -> new NotYetConnectedException());
+		try {
+			int nb = writer.write(address, serializerBuffer);
+			Cheat.LOGGER.log(Level.FINEST, nb + " bytes sent.");
+			return true;
+		} catch (IOException e) {
+			Cheat.LOGGER.log(Level.WARNING, "Fail to send data.", e);
+			return false;
+		}
+	}
+	
+	private boolean send(SocketAddress address) {
+		return send(address, serializerBuffer);
+	}
+	
+	protected synchronized boolean send(SocketAddress address, Message message) throws NotYetConnectedException {
+		if(!networkWriter.isPresent())
+			throw new NotYetConnectedException();
+		Cheat.LOGGER.log(Level.FINE, "Sending message..");
+		serializerBuffer.clear();
+		serializerBuffer.put(message.getFlag());
+		message.writeToBuff(serializerBuffer);
+		serializerBuffer.flip();
+		if(send(address)) {
+			Cheat.LOGGER.log(Level.FINER, "Message " + message + " sent.");
+			return true;
+		}
+		return false;
+	}
+	
+	protected static <T> CompletableFuture<T> getNotYetConnectedFuture() {
+		CompletableFuture<T> error = new CompletableFuture<>();
+		error.completeExceptionally(new NotYetConnectedException());
+		return error;
 	}
 	
 }

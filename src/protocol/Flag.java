@@ -11,5 +11,17 @@ public final class Flag {
 	public static final byte DECLINE = 8;
 	public static final byte ABORT = 9;
 	
+	public static final byte CERTIFICATION_REQUEST = 10;
+	public static final byte CERTIFICATION_REPLY = 11;
+	public static final byte CERTIFICATION_GET = 12;
+	
+	public static final byte SESSION_REQUEST = 13;
+	public static final byte SESSION_REPLY = 14;
+	public static final byte SESSION_INIT = 15;
+	public static final byte SESSION_ACK = 16;
+	public static final byte SESSION_START = 17;
+	public static final byte SESSION_STOP = 18;
+	public static final byte SESSION_FORGET = 19;
+	
 	private Flag() {}
 }
