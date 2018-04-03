@@ -1,7 +1,7 @@
 package session.message;
 
 import protocol.Message;
-import protocol.message.TrackedMessage;
+import protocol.TrackedMessage;
 
 public abstract class AbstractSessionMessage extends Message implements TrackedMessage {
 

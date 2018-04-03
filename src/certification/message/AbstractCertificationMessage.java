@@ -1,7 +1,7 @@
 package certification.message;
 
 import protocol.Message;
-import protocol.message.TrackedMessage;
+import protocol.TrackedMessage;
 
 public abstract class AbstractCertificationMessage extends Message implements TrackedMessage {
 
