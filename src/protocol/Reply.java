@@ -11,7 +11,6 @@ public class Reply extends Message {
 	public static final Creator<Reply> CREATOR = Reply::new;
 	
 	// TODO ?
-	private Request request;
 	
 	private String hostname;
 	private String link;

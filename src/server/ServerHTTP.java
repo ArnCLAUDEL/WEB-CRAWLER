@@ -1,82 +1,87 @@
 package server;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
 import java.util.Scanner;
 
-import client.SimpleClient;
-import javafx.scene.transform.Scale;
-
 public class ServerHTTP {
-
-    public static void main(String[] args){
-        try{
-            ServerSocket serverSocket = new ServerSocket(8000);
-
-            for(;;){
-                Object block = new Object();
-                RequestHandler handler = new RequestHandler(block, serverSocket);
-                handler.start();
-
-                try{
-                    synchronized(block){
-                        System.out.println("Server thread paused...");
-                        block.wait();
-                        System.out.println("Server thread creating new RequestHandler...");
-                    }
-                }catch(InterruptedException e){
-                    System.out.println("Can't be interrupted!");
-                    e.printStackTrace();
-                }
-            }
-
-        }catch(IOException e){
-            System.out.println("IOException!");
-            e.printStackTrace();
-        }
-    }
-}
-
-class RequestHandler extends Thread {
-
-    Object block;
-    ServerSocket serverSocket;
-    BufferedReader socketReader;
-    PrintWriter socketWriter;
-
-    public RequestHandler(Object block, ServerSocket serverSocket){
-        this.block = block;
-        this.serverSocket = serverSocket;
-    }
-
-    @Override
-    public void run() {
-        try{
-            System.out.println("Waiting for request...");
-            Socket clientSocket = serverSocket.accept();
-            System.out.println("Connection made.");
-
-
-            socketReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));            
-            socketWriter = new PrintWriter(clientSocket.getOutputStream(), true);
-
-            String input=socketReader.readLine();
-            String patWebSite= "webSite=.* HTTP";
-            Scanner scanner = new Scanner(input);
-            String site=((scanner.findInLine(patWebSite)).replace("webSite=", "")).replace(" HTTP", "");
-            scanner.close();
-            String [] args = {site};
-            
-            SimpleServer.main(args);
-            
-        }catch(IOException e){
-            System.out.println("IOException!");
-            e.printStackTrace();
-        }
-    }
-
+	private ServerSocketChannel ssc;
+	private Selector selector;
+	private ByteBuffer bb;
+	private Server server;
+	private String webSite;
+	
+	public ServerHTTP(int p) throws IOException{
+		ssc =ServerSocketChannel.open();
+		ssc.configureBlocking(false);
+		ssc.bind(new InetSocketAddress(p));
+		selector = Selector.open();
+		bb = ByteBuffer.allocateDirect(512);
+		server = new SimpleServer(8080);
+		ssc.register(selector, SelectionKey.OP_ACCEPT);	
+	}
+	
+	void accept() throws IOException {
+		SocketChannel sc = ssc.accept();
+		if( sc == null) {
+			System.out.println("Rien à accepter");
+			return;
+		}
+		sc.configureBlocking(false);
+		sc.register(selector, SelectionKey.OP_READ);
+		System.out.println("accept:"+sc);
+	}
+	
+	void repeat(SelectionKey sk) throws IOException {
+		SocketChannel sc = (SocketChannel) sk.channel();
+		bb.clear();
+		if(sc.read(bb) == -1) {
+			System.out.println("connection" + sc +" closed");
+			sk.cancel();
+			sc.close();
+			return;
+		}
+		bb.flip();
+		
+		Charset c= Charset.forName("UTF-8");
+		CharBuffer cb = c.decode(bb);
+        Scanner scanner = new Scanner(cb.toString());
+        webSite=((scanner.findInLine("webSite=.* HTTP")).replace("webSite=", "")).replace(" HTTP", "");
+        scanner.close();
+        System.out.println(server);
+        bb.clear();
+		
+	}
+	
+	public String getWebSite() {
+		return webSite;
+	}
+	
+	void run() throws IOException {
+		while(true) {
+			selector.select();
+			for( SelectionKey sk: selector.selectedKeys() ) {
+				if(sk.isAcceptable() ) {
+					accept();
+				}else if( sk.isReadable() ) {
+					repeat(sk);
+				}
+			}
+			selector.selectedKeys().clear();	
+		}
+		
+	}
+	
+	public static void main(String[] args) throws IOException {
+		ServerHTTP s = new ServerHTTP(8000);
+		s.run();
+		
+	}
 }
