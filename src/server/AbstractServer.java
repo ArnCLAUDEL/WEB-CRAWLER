@@ -27,7 +27,7 @@ public abstract class AbstractServer extends AbstractIOEntity implements Server 
 	
 	protected final Set<ClientIdentifier> clients;
 	protected final Set<ClientIdentifier> activeClients;
-	protected final Deque<ClientIdentifier> clientQueue = new ArrayDeque<>();	
+	protected final Deque<ClientIdentifier> clientQueue = new ArrayDeque<>();
 	protected final InetSocketAddress address;
 	
 	protected Explorer explorer;

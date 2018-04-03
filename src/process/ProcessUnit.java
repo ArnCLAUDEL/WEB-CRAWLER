@@ -16,22 +16,23 @@ import HttpRequest.HttpGet;
 import util.Cheat;
 import util.SerializerBuffer;
 
-public class ProcessUnit implements Callable<Set<String>>{
+public class ProcessUnit implements Callable<ProcessUnitReply>{
 	
-	
+	 
 	private Set<String> links;
 	private Set<String> keyWords;
-	private final SerializerBuffer sb = new SerializerBuffer() ;
-	private final StringBuilder sbpage = new StringBuilder();
 	
-	private final static Pattern patternCode = Pattern.compile("[0-9]{3}");
-	private final static Pattern patternLoc = Pattern.compile("Location: (https?)://(.*)");
+	private final SerializerBuffer sb = new SerializerBuffer() ;
+	private final static Pattern PATTERNCODE = Pattern.compile("[0-9]{3}");
+	private final static Pattern PATTERNLOC = Pattern.compile("Location: (https?)://(.*)");
 	private final static String AMP_ESCAPED = "&amp;";
 	private final static String ACHOR_ESCAPED = "#";
 	private final static String AMP_ESCAPED_REPLACEMENT = "";
 
+	
 	private String hostname;
 	private String relativLink;
+	private String parsePage;
 	private SocketChannel s;
 	private int code = 0;
 	private boolean doparse=false;	
@@ -41,11 +42,10 @@ public class ProcessUnit implements Callable<Set<String>>{
 		this.relativLink = relativLink;
 		this.links = new TreeSet<>();
 		this.keyWords = new TreeSet<>();
-
 	}
 	
 	@Override
-	public Set<String> call() throws IOException {
+	public ProcessUnitReply call() throws IOException {
 		do {
 			Cheat.LOGGER.log(Level.INFO, "Send create Socket"); createSocket();
 			Cheat.LOGGER.log(Level.INFO, "Generate Socket"); generateRequest();
@@ -53,25 +53,26 @@ public class ProcessUnit implements Callable<Set<String>>{
 		}while(canRedirect());
 		if(doparse) {
 			Cheat.LOGGER.log(Level.INFO, "Parse all links in page"); links.addAll(parseLink());
-			Cheat.LOGGER.log(Level.INFO, "Parse all key words in page"); keyWords.addAll(parseKeyWord());
 			}
-		return links;
+		return new ProcessUnitReply(links, keyWords);
 	}
 	
 	
 	private Set<String> parseLink() throws IOException {
-		String HREF_REGEX = "href=\"(http://"+hostname+")?/([^\"]*)";
+		String HREF_REGEX = "href=\"(http://"+hostname+")?(/?[^\"]*)";
 		Pattern pattern = Pattern.compile(HREF_REGEX);
 		Scanner scanner = new Scanner(s.socket().getInputStream());
 		Matcher m;
 		String line,urlMatched;
-		
+		parsePage="";
 		while(scanner.hasNextLine()) {
 			line= scanner.nextLine();
-			sbpage.append(line);
 			m = pattern.matcher(line);
+			parsePage+=line;
 			while(m.find()) {
 				urlMatched = format(m.group(2));
+				if(urlMatched.charAt(0)!='/')
+					urlMatched = relativLink+urlMatched;
 				Cheat.LOGGER.log(Level.FINEST, "URL found: " + urlMatched);
 				links.add(urlMatched);
 			}
@@ -80,10 +81,11 @@ public class ProcessUnit implements Callable<Set<String>>{
 		
 		return links;
 	}
-
-	private Set<String> parseKeyWord(){
-		return new HtmlParser(sbpage.toString()).getAllKeyWord();
+	
+	private Set<String> parseKeyWord() {
+		return new HtmlParser(parsePage).parseTagP();
 	}
+	
 	
 	private void createSocket() throws IOException {
 		s = SocketChannel.open(new InetSocketAddress(hostname, 80));
@@ -95,7 +97,7 @@ public class ProcessUnit implements Callable<Set<String>>{
 		createHttpGet();
 		sb.flip();
 		Cheat.LOGGER.log(Level.INFO, "Write on Serializable Buffer");
-		socketWrite();
+		s.write(sb.getBuffer());
 		
 	}
 	
@@ -123,20 +125,17 @@ public class ProcessUnit implements Callable<Set<String>>{
 
 	}
 	
-	private void socketWrite() throws IOException {
-		s.write(sb.getBuffer());
-	}
-	
 	private int getCode() {
 		Scanner s = new Scanner(BuffToString(sb));
-		int i =Integer.parseInt(s.findInLine(patternCode));
+		int i =Integer.parseInt(s.findInLine(PATTERNCODE));
 		s.close();
+		
 		return i;
 	}
 	
 	private String getRdir() {
 		Scanner scanner = new Scanner(BuffToString(sb));
-		String location=scanner.findWithinHorizon(patternLoc, 0);
+		String location=scanner.findWithinHorizon(PATTERNLOC, 0);
 		if(location.contains("https")) {
 			location=hostname;
 		}
@@ -150,9 +149,7 @@ public class ProcessUnit implements Callable<Set<String>>{
 	
 	
 	private String BuffToString(SerializerBuffer sb) {
-		sb.mark();
-		String s = sb.toString();
-		sb.reset();
+		String s = Cheat.CHARSET.decode(sb.getBuffer()).toString();
 		return s;
 	}
 	
@@ -170,7 +167,7 @@ public class ProcessUnit implements Callable<Set<String>>{
 	}
 
 	public static void main(String[] args) throws IOException {
-		ProcessUnit pu = new ProcessUnit("www.onisep.fr","");
+		ProcessUnit pu = new ProcessUnit("www.onisep.fr","/");
 		Cheat.LOGGER.log(Level.INFO, "Send create Socket");
 		do {
 			Cheat.LOGGER.log(Level.INFO, "Send create Socket"); pu.createSocket();
@@ -179,7 +176,8 @@ public class ProcessUnit implements Callable<Set<String>>{
 		}while(pu.canRedirect());
 		if(pu.doparse) {
 			Cheat.LOGGER.log(Level.INFO, "Parse all links in page"); pu.links.addAll(pu.parseLink());
-			Cheat.LOGGER.log(Level.INFO, "Parse all key words in page");pu.keyWords.addAll(pu.parseKeyWord());}
+			Cheat.LOGGER.log(Level.INFO, "Parse all words in page"); pu.keyWords.addAll(pu.parseKeyWord());
+			}
 			
 		System.out.println(pu.links);
 		System.out.println(pu.keyWords);

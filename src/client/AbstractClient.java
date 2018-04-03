@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import client.state.NotConnectedClientProtocolHandler;
 import io.AbstractIOEntity;
 import process.ProcessExecutor;
+import process.ProcessUnitReply;
 import protocol.Abort;
 import protocol.Decline;
 import protocol.Forget;
@@ -125,7 +126,7 @@ public abstract class AbstractClient extends AbstractIOEntity implements Client 
 	
 	@Override
 	public void scan(String hostname, String link) {
-		Future<Set<String>> future = executor.scan(hostname, link);
+		Future<ProcessUnitReply> future = executor.scan(hostname, link);
 		CompletableFuture.supplyAsync(() -> {
 			try {
 				return future.get();
@@ -133,8 +134,8 @@ public abstract class AbstractClient extends AbstractIOEntity implements Client 
 				Cheat.LOGGER.log(Level.WARNING, e.getMessage(), e);
 			}
 			return null;
-		}).thenAccept(urls -> {
-			Reply reply = new Reply(hostname, link, urls);
+		}).thenAccept(puReply -> {
+			Reply reply = new Reply(hostname,link,puReply);
 			sendReply(reply);
 		}).whenComplete((v,e) -> {
 			Cheat.LOGGER.log(Level.WARNING, e.getMessage(), e);

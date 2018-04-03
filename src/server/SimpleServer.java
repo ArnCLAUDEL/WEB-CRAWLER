@@ -12,10 +12,10 @@ public class SimpleServer extends AbstractTCPServer {
 
 	public static void main(String[] args) {
 		Cheat.setLoggerLevelDisplay(Level.ALL);
-		
+		Cheat.initPrintW();
 		Server server = new SimpleServer(8080);
 		Thread t1;
-		
+
 		t1 = new Thread(server);
 		
 		t1.start();

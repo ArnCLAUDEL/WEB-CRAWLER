@@ -1,5 +1,8 @@
 package util;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.Random;
 import java.util.logging.ConsoleHandler;
@@ -15,6 +18,7 @@ public class Cheat {
 	public final static Random RANDOM = new Random();
 	public final static Charset CHARSET = Charset.forName("UTF-8");
 	public final static Logger LOGGER = Logger.getLogger("WEB-CRAWLER");
+	public static PrintWriter pw;
 	
 	public static void setLoggerLevelDisplay(Level level) {
 		setLoggerLevelDisplay(LOGGER, level);
@@ -32,18 +36,30 @@ public class Cheat {
 		logger.setUseParentHandlers(false);
 	}
 	
-	private void httpRequest() {
-		/*
-		SocketChannel s = SocketChannel.open(new InetSocketAddress("www.onisep.fr", 80));
-		ByteBuffer b = ByteBuffer.allocate(2048);
-		b.put(("GET /Formation-et-handicap HTTP/1.1\r\n" +  
-		"Host: www.onisep.fr\r\n" + 
-		"Connection: Keep-Alive\r\n\r\n").getBytes());
+	public static void initPrintW() {
+		File f = new File("resultat.html");
+		if(f.exists())
+			f.delete();
+		try {
+			pw = new PrintWriter("resultat.html");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
-		b.flip();
-		s.write(b);
+		pw.println("<html>\n" + 
+				"\n" + 
+				"<head>\n" + 
+				"<title>Resultat Exploration</title>\n" + 
+				"</head>\n" + 
+				"\n" + 
+				"<body>");
 		
-		Set<String> links = getContent(s.socket().getInputStream());
-		*/
+	}
+	
+
+	
+	public static void writeResult(String s) {
+		pw.println(s);
 	}
 }

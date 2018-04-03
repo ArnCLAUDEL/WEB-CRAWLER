@@ -48,9 +48,9 @@ public class ProcessExecutor implements Executor {
 		Cheat.setLoggerLevelDisplay(Level.FINE);
 		ProcessExecutor executor = new ProcessExecutor();
 		
-		List<Future<Set<String>>> futureResults = new ArrayList<>();
+		List<Future<ProcessUnitReply>> futureResults = new ArrayList<>();
 		
-		Future<Set<String>> futureResult = executor.submit(new ProcessUnit("https://en.wiktionary.org","/wiki/Captain_Obvious"));
+		Future<ProcessUnitReply> futureResult = executor.submit(new ProcessUnit("https://en.wiktionary.org","/wiki/Captain_Obvious"));
 		for(int i = 0; i < 200; i++) {
 			try {Thread.sleep(100);}
 			catch(InterruptedException e) {}
@@ -102,7 +102,7 @@ public class ProcessExecutor implements Executor {
 		return task;
 	}
 	
-	public Future<Set<String>> scan(String hostname,String link) {
+	public Future<ProcessUnitReply> scan(String hostname,String link) {
 		return submit(new ProcessUnit(hostname,link));
 	}
 	

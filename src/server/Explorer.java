@@ -30,11 +30,14 @@ public class Explorer {
 	}
 	
 	public synchronized void processReply(Reply reply) {
+		
 		Cheat.LOGGER.log(Level.FINER, "Processing reply.");
 		links.put(reply.getLink(), STATE.EXPLORED);
+		Cheat.writeResult("<p>Link : "+reply.getLink()+"</p><table>");
 		reply	.getUrls().stream()
 				.filter(url -> links.getOrDefault(url, STATE.NOT_EXPLORED) == STATE.NOT_EXPLORED)
-				.forEach(url -> links.put(url, STATE.NOT_EXPLORED));
+				.forEach(url -> {links.put(url, STATE.NOT_EXPLORED);Cheat.writeResult("<tr><td>"+url+"</td></tr>");});
+		Cheat.writeResult("</table>");
 		sendRequests();
 		Cheat.LOGGER.log(Level.FINER, "Reply processed.");
 		System.out.println();
