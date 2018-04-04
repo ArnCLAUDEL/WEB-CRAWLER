@@ -87,6 +87,16 @@ public class AbstractProtocolHandler {
 		new Timer().scheduleAtFixedRate(task, firstTime, period);
 	}
 	
+	protected Consumer<? super SerializerBuffer> getFlushCallback(SocketAddress address) {
+		return (serializerBuffer) -> {
+			Cheat.LOGGER.log(Level.FINER, "Flushing data..");
+			serializerBuffer.flip();
+			send(address, serializerBuffer);
+			serializerBuffer.clear();
+			Cheat.LOGGER.log(Level.FINER, "Data sent and buffer cleared.");
+		};
+	}
+	
 	private boolean send(SocketAddress address, SerializerBuffer serializerBuffer) throws NotYetConnectedException {
 		NetworkWriter writer = networkWriter.orElseThrow(() -> new NotYetConnectedException());
 		try {

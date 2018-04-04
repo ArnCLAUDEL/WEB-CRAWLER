@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import service.message.Reply;
-import service.message.Request;
+import service.message.ServiceReply;
+import service.message.ServiceRequest;
 import util.Cheat;
 
 public class Explorer {
@@ -16,18 +16,18 @@ public class Explorer {
 	
 	public static enum STATE { NOT_EXPLORED, EXPLORING, EXPLORED };
 	
-	private final Server server;
+	private final ServiceServer server;
 	private final String hostname;
 	private final Map<String, STATE> links;
 	
-	public Explorer(Server server, String hostname) {
+	public Explorer(ServiceServer server, String hostname) {
 		this.server = server;
 		this.hostname= hostname;
 		this.links = new HashMap<>();
 		this.links.put("/", STATE.NOT_EXPLORED);
 	}
 	
-	public synchronized void processReply(Reply reply) {
+	public synchronized void processReply(ServiceReply reply) {
 		Cheat.LOGGER.log(Level.FINER, "Processing reply.");
 		links.put(reply.getLink(), STATE.EXPLORED);
 		reply	.getUrls().stream()
@@ -52,11 +52,11 @@ public class Explorer {
 		links	.entrySet().stream()
 				.filter((e) -> e.getValue() == STATE.NOT_EXPLORED)
 				.map(Map.Entry::getKey)
-				.map((key)-> new Request(hostname,key))
+				.map((key)-> new ServiceRequest(hostname,key))
 				.collect(Collectors.groupingBy(server::sendRequest))
 				.getOrDefault(Boolean.TRUE, new ArrayList<>())
 				.stream()
-				.map(Request::getLink)
+				.map(ServiceRequest::getLink)
 				.forEach(url -> links.put(url, STATE.EXPLORING));
 		Cheat.LOGGER.log(Level.FINER, "Requests sent.");
 	}

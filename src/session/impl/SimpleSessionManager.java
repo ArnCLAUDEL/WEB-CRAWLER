@@ -1,5 +1,6 @@
 package session.impl;
 
+import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -53,8 +54,17 @@ public class SimpleSessionManager implements SessionManager {
 	}
 
 	@Override
-	public SessionInfo getSession() throws NoSuchElementException {
-		Optional<SessionInfo> info = sessions.values().stream().findAny();
+	public SessionInfo getRandomExplorer() throws NoSuchElementException {
+		return getRandom(Certificate.EXPLORER);
+	}
+	
+	@Override
+	public SessionInfo getRandomAgent() throws NoSuchElementException {
+		return getRandom(Certificate.AGENT);
+	}
+	
+	private SessionInfo getRandom(byte type) throws NoSuchElementException {
+		Optional<SessionInfo> info = sessions.values().stream().filter(session -> session.getCertificate().getType() == type).findAny();
 		if(!info.isPresent())
 			throw new NoSuchElementException("No session found");
 		
@@ -71,4 +81,10 @@ public class SimpleSessionManager implements SessionManager {
 		return new SessionInfo(id, certificate);
 	}
 	
+	@Override
+	public SessionInfo getSession(InetSocketAddress address) throws NoSuchElementException {
+		return sessions.values().stream()
+						.filter(info -> info.getCertificate().getAddress().getHostName().equals(address.getHostName()))
+						.findFirst().get();
+	}
 }

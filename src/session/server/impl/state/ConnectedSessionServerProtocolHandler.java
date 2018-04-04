@@ -36,7 +36,7 @@ public class ConnectedSessionServerProtocolHandler extends AbstractSessionServer
 		try {
 			Future<Certificate> futureCertificate = retriever.getCertificate(request.getCertificateIdentifier());
 			Certificate clientCertificate = futureCertificate.get();
-			Certificate explorerCertificate = manager.getSession().getCertificate();
+			Certificate explorerCertificate = manager.getRandomExplorer().getCertificate();
 			reply = new SessionReply(request.getId(), explorerCertificate);
 		} catch (NoSuchElementException e) {
 			reply = new SessionReply(request.getId(), e.getMessage());
