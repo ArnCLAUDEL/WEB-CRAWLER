@@ -50,6 +50,12 @@ public class ServerHTTP implements Runnable{
 		}
 		bb.flip();
 		
+		scanUrl(bb);
+	}
+	
+	
+	
+	void scanUrl(ByteBuffer bb){
 		Charset c= Charset.forName("UTF-8");
 		CharBuffer cb = c.decode(bb);
         Scanner scanner = new Scanner(cb.toString());
@@ -57,9 +63,7 @@ public class ServerHTTP implements Runnable{
         scanner.close();
         server.scan(webSite);
         bb.clear();
-		
 	}
-	
 	public String getWebSite() {
 		return webSite;
 	}
